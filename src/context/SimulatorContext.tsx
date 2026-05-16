@@ -12,6 +12,8 @@ interface SimulatorContextType {
   isLoading: boolean;
   justification: string | null;
   submitCustomPolicy: (title: string, description: string) => Promise<void>;
+  undoPolicy: (id: string) => void;
+  resetSimulator: () => void;
 }
 
 const SimulatorContext = createContext<SimulatorContextType | undefined>(undefined);
@@ -59,15 +61,15 @@ export function SimulatorProvider({ children }: { children: ReactNode }) {
         })
       );
 
-      const responseJustification = data.justification;
-      setJustification(responseJustification);
+      setJustification(data.justification);
 
       setActivePolicies((prev) => [
         {
           id: Math.random().toString(36).substr(2, 9),
           title,
           description,
-          justification: responseJustification,
+          justification: data.justification,
+          shifts: data.metric_shifts,
         },
         ...prev,
       ]);
@@ -77,6 +79,33 @@ export function SimulatorProvider({ children }: { children: ReactNode }) {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const undoPolicy = (id: string) => {
+    const policyToUndo = activePolicies.find(p => p.id === id);
+    if (!policyToUndo || !policyToUndo.shifts) return;
+
+    setCurrentMetrics((prev) =>
+      prev.map((m) => {
+        const shift = policyToUndo.shifts![m.id] || 0;
+        let newVal = m.value - shift; // Reverse the shift
+        newVal = Math.max(m.min, Math.min(m.max, newVal));
+        return { ...m, value: newVal };
+      })
+    );
+
+    setActivePolicies((prev) => prev.filter(p => p.id !== id));
+    
+    // Clear justification if it was the most recent one
+    if (activePolicies[0]?.id === id) {
+      setJustification(null);
+    }
+  };
+
+  const resetSimulator = () => {
+    setActivePolicies([]);
+    setCurrentMetrics(initialMetrics);
+    setJustification(null);
   };
 
   const stabilityScore = currentMetrics.find((m) => m.id === "government_stability")?.value || 0;
@@ -91,6 +120,8 @@ export function SimulatorProvider({ children }: { children: ReactNode }) {
         isLoading,
         justification,
         submitCustomPolicy,
+        undoPolicy,
+        resetSimulator,
       }}
     >
       {children}

@@ -3,30 +3,55 @@
 import React from "react";
 import { useSimulator } from "../context/SimulatorContext";
 import { Progress } from "./ui/progress";
-import { Activity } from "lucide-react";
+import { Button } from "./ui/button";
+import { RotateCcw } from "lucide-react";
 
 export default function TopBar() {
-  const { stabilityScore } = useSimulator();
-
-  let stabilityColor = "bg-green-500";
-  if (stabilityScore < 40) stabilityColor = "bg-red-500";
-  else if (stabilityScore < 70) stabilityColor = "bg-yellow-500";
+  const { stabilityScore, resetSimulator } = useSimulator();
 
   return (
-    <header className="sticky top-0 z-10 bg-slate-900 border-b border-slate-800 text-white shadow-sm">
-      <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <Activity className="h-6 w-6 text-blue-500" />
-          <h1 className="text-xl font-bold tracking-tight">Belgian Policy Simulator</h1>
+    <header className="h-16 border-b border-white/10 bg-black/80 backdrop-blur-md flex items-center justify-between px-6 sticky top-0 z-50">
+      <div className="flex items-center gap-4">
+        <div className="flex flex-col">
+          <h1 className="text-xl font-black tracking-tighter flex items-center gap-2">
+            <span className="text-white">BELGIË</span>
+            <span className="text-[#FFD700]">POLITIEKE</span>
+            <span className="text-[#ED2939]">SIMULATOR</span>
+          </h1>
+          <div className="h-1 w-full flex">
+            <div className="h-full w-1/3 bg-black" />
+            <div className="h-full w-1/3 bg-[#FFD700]" />
+            <div className="h-full w-1/3 bg-[#ED2939]" />
+          </div>
+        </div>
+      </div>
+
+      <div className="flex items-center gap-8">
+        <div className="flex flex-col items-end w-48 lg:w-64">
+          <div className="flex justify-between w-full mb-1">
+            <span className="text-[10px] uppercase tracking-widest font-bold text-slate-400">Regeringsstabiliteit</span>
+            <span className="text-[10px] font-bold text-slate-200">{stabilityScore}%</span>
+          </div>
+          <Progress 
+            value={stabilityScore} 
+            className="h-1.5 bg-slate-800" 
+            indicatorClassName={
+              stabilityScore > 70 ? "bg-green-500" : 
+              stabilityScore > 40 ? "bg-yellow-500" : 
+              "bg-red-600 shadow-[0_0_10px_rgba(220,38,38,0.5)]"
+            }
+          />
         </div>
 
-        <div className="flex items-center gap-4 w-64 md:w-96">
-          <span className="text-sm font-medium whitespace-nowrap">Gov Stability</span>
-          <div className="flex-1">
-            <Progress value={stabilityScore} className="h-3" indicatorClassName={stabilityColor} />
-          </div>
-          <span className="text-sm font-bold w-8 text-right">{stabilityScore}%</span>
-        </div>
+        <Button 
+          variant="outline" 
+          size="sm" 
+          onClick={resetSimulator}
+          className="border-white/10 bg-white/5 hover:bg-white/10 text-white gap-2 text-xs font-bold uppercase tracking-wider"
+        >
+          <RotateCcw className="w-3 h-3" />
+          Opnieuw Beginnen
+        </Button>
       </div>
     </header>
   );

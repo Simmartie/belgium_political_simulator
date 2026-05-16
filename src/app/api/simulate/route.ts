@@ -8,24 +8,15 @@ export async function POST(request: Request) {
 
     const apiKey = process.env.GEMINI_API_KEY;
 
-    if (!apiKey || apiKey === "your_api_key_here") {
-      console.warn("API key is missing. Using mock response for verification.");
-      // Provide a mock response for verification purposes
-      return NextResponse.json({
-        metric_shifts: {
-          budget_deficit: 1.25,
-          purchasing_power: -3.5,
-          flemish_satisfaction: -8.5,
-          walloon_satisfaction: -12.0,
-          climate_progress: 0.5,
-          government_stability: -5.5
-        },
-        justification: "Mock analyse: De voorgestelde beleidswijziging leidt tot aanzienlijke debatten in het parlement. Zowel Vlaamse als Waalse media benadrukken de economische gevolgen voor de middenklasse."
-      });
+    if (!apiKey) {
+      return NextResponse.json(
+        { error: "API key is missing in .env.local. Please add GEMINI_API_KEY and restart the server." },
+        { status: 500 }
+      );
     }
 
     const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
     const prompt = `You are the core simulation engine of a Belgian Political Simulator. The user is entering a CUSTOM policy written in natural language.
 Analyze the policy's text and calculate its numerical impact on Belgium's metrics.
@@ -54,7 +45,7 @@ Here is the actual INPUT:
 
     const result = await model.generateContent(prompt);
     let responseText = result.response.text();
-    
+
     // Clean up markdown formatting if the model still returns it
     if (responseText.startsWith('\`\`\`json')) {
       responseText = responseText.substring(7);
@@ -65,7 +56,7 @@ Here is the actual INPUT:
     if (responseText.endsWith('\`\`\`')) {
       responseText = responseText.substring(0, responseText.length - 3);
     }
-    
+
     const parsedData = JSON.parse(responseText.trim());
 
     return NextResponse.json(parsedData);

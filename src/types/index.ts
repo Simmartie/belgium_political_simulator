@@ -12,6 +12,7 @@ export interface CustomPolicy {
   title: string;
   description: string;
   justification?: string;
+  shifts?: Record<string, number>;
 }
 
 export interface SimulatorState {
