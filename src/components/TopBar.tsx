@@ -7,7 +7,7 @@ import { Button } from "./ui/button";
 import { RotateCcw } from "lucide-react";
 
 export default function TopBar() {
-  const { stabilityScore, resetSimulator } = useSimulator();
+  const { resetSimulator } = useSimulator();
 
   return (
     <header className="h-16 border-b border-white/10 bg-black/80 backdrop-blur-md flex items-center justify-between px-6 sticky top-0 z-50">
@@ -29,18 +29,8 @@ export default function TopBar() {
       <div className="flex items-center gap-8">
         <div className="flex flex-col items-end w-48 lg:w-64">
           <div className="flex justify-between w-full mb-1">
-            <span className="text-[10px] uppercase tracking-widest font-bold text-slate-400">Regeringsstabiliteit</span>
-            <span className="text-[10px] font-bold text-slate-200">{stabilityScore}%</span>
+            <span className="text-[10px] uppercase tracking-widest font-bold text-slate-400">Belgische Politieke Simulator</span>
           </div>
-          <Progress 
-            value={stabilityScore} 
-            className="h-1.5 bg-slate-800" 
-            indicatorClassName={
-              stabilityScore > 70 ? "bg-green-500" : 
-              stabilityScore > 40 ? "bg-yellow-500" : 
-              "bg-red-600 shadow-[0_0_10px_rgba(220,38,38,0.5)]"
-            }
-          />
         </div>
 
         <Button 

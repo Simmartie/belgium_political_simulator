@@ -7,7 +7,7 @@ import { Button } from "./ui/button";
 import { Undo2, Plus, AlertCircle } from "lucide-react";
 
 export default function PolicySidebar() {
-  const { activePolicies, submitCustomPolicy, isLoading, justification, undoPolicy } = useSimulator();
+  const { activePolicies, submitCustomPolicy, isLoading, mediaReactions, undoPolicy } = useSimulator();
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
 
@@ -88,25 +88,69 @@ export default function PolicySidebar() {
           </Card>
         </section>
 
-        {/* Politieke Analyse - VRT NWS BREAKING STYLE */}
-        {justification && (
+        {/* Politieke Analyse - Media Reacties */}
+        {mediaReactions && (
           <section className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-            <Card className="bg-[#ED2939] border-none overflow-hidden relative premium-shadow">
-              <div className="absolute top-0 right-0 p-1 opacity-20">
-                <AlertCircle className="w-12 h-12 text-white" />
-              </div>
-              <CardHeader className="p-4 pb-1">
-                <CardTitle className="text-[10px] font-black text-white uppercase tracking-[0.3em] flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-white animate-pulse" />
-                  VRT NWS BREAKING
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-4 pt-1">
-                <p className="text-sm text-white font-medium leading-relaxed italic">
-                  "{justification}"
-                </p>
-              </CardContent>
-            </Card>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xs font-black uppercase tracking-[0.2em] text-slate-500">Media Reacties</h2>
+            </div>
+            <div className="grid grid-cols-1 gap-3">
+              {/* Socialist */}
+              <Card className="bg-[#ED2939]/10 border-[#ED2939]/20 overflow-hidden relative">
+                <CardHeader className="p-3 pb-1">
+                  <CardTitle className="text-[9px] font-black text-[#ED2939] uppercase tracking-widest">
+                    Socialistische Pers
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-3 pt-1">
+                  <p className="text-xs text-white font-medium italic">
+                    "{mediaReactions.socialist}"
+                  </p>
+                </CardContent>
+              </Card>
+
+              {/* Liberal */}
+              <Card className="bg-[#0047AB]/10 border-[#0047AB]/20 overflow-hidden relative">
+                <CardHeader className="p-3 pb-1">
+                  <CardTitle className="text-[9px] font-black text-[#3b82f6] uppercase tracking-widest">
+                    Liberale Pers
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-3 pt-1">
+                  <p className="text-xs text-white font-medium italic">
+                    "{mediaReactions.liberal}"
+                  </p>
+                </CardContent>
+              </Card>
+
+              {/* Nationalist/Conservative */}
+              <Card className="bg-[#FFD700]/10 border-[#FFD700]/20 overflow-hidden relative">
+                <CardHeader className="p-3 pb-1">
+                  <CardTitle className="text-[9px] font-black text-[#FFD700] uppercase tracking-widest">
+                    Nationalistische Pers
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-3 pt-1">
+                  <p className="text-xs text-white font-medium italic">
+                    "{mediaReactions.nationalist}"
+                  </p>
+                </CardContent>
+              </Card>
+
+              {/* Christian Democrat */}
+              <Card className="bg-[#FF8C00]/10 border-[#FF8C00]/20 overflow-hidden relative">
+                <CardHeader className="p-3 pb-1">
+                  <CardTitle className="text-[9px] font-black text-[#f97316] uppercase tracking-widest">
+                    Christendemocratische Pers
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-3 pt-1">
+                  <p className="text-xs text-white font-medium italic">
+                    "{mediaReactions.christian_democrat}"
+                  </p>
+                </CardContent>
+              </Card>
+            </div>
           </section>
         )}
 

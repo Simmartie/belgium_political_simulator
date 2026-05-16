@@ -3,6 +3,7 @@
 import React from "react";
 import { useSimulator } from "../context/SimulatorContext";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
+import ProvinceMap from "./map/ProvinceMap";
 import {
   BarChart,
   Bar,
@@ -15,10 +16,14 @@ import {
 } from "recharts";
 
 export default function MetricsDashboard() {
-  const { currentMetrics } = useSimulator();
+  const { currentMetrics, flemishSatisfaction, walloonSatisfaction } = useSimulator();
 
-  // Filter out government_stability for the main chart
-  const chartData = currentMetrics.filter((m) => m.id !== "government_stability");
+  // Filter out government_stability for the main chart, and map it so we show regional satisfaction
+  const chartData = [
+    ...currentMetrics.filter((m) => m.id !== "flemish_satisfaction" && m.id !== "walloon_satisfaction" && m.id !== "government_stability"),
+    { name: "Flemish Satisfaction", value: flemishSatisfaction, color: "#f59e0b" },
+    { name: "Walloon Satisfaction", value: walloonSatisfaction, color: "#ef4444" },
+  ];
 
   return (
     <div className="flex-1 p-6 lg:p-10 space-y-10 overflow-y-auto bg-black">
@@ -69,6 +74,33 @@ export default function MetricsDashboard() {
         </Card>
       </section>
 
+      {/* Map Section */}
+      <section>
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-sm font-black uppercase tracking-[0.3em] text-slate-400 flex items-center gap-3">
+            <span className="w-8 h-[2px] bg-[#3b82f6]" />
+            Regionale Steun
+          </h2>
+        </div>
+        <Card className="bg-white/5 border-white/5 premium-shadow overflow-hidden">
+          <CardContent className="p-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+                <ProvinceMap />
+                <div className="space-y-6">
+                    <div>
+                        <h3 className="text-xl font-bold text-white mb-2 text-[#f59e0b]">Vlaanderen</h3>
+                        <div className="text-4xl font-black">{flemishSatisfaction.toFixed(1)}%</div>
+                    </div>
+                    <div>
+                        <h3 className="text-xl font-bold text-white mb-2 text-[#ef4444]">Wallonië</h3>
+                        <div className="text-4xl font-black">{walloonSatisfaction.toFixed(1)}%</div>
+                    </div>
+                </div>
+            </div>
+          </CardContent>
+        </Card>
+      </section>
+
       {/* Metric Cards Grid */}
       <section>
         <div className="flex items-center justify-between mb-6">
@@ -106,7 +138,7 @@ export default function MetricsDashboard() {
                   <div 
                     className="h-full transition-all duration-1000 ease-out shadow-[0_0_10px_rgba(0,0,0,0.5)]" 
                     style={{ 
-                      width: `${((metric.value - metric.min) / (metric.max - metric.min)) * 100}%`,
+                      width: `${Math.max(0, Math.min(100, ((metric.value - metric.min) / (metric.max - metric.min)) * 100))}%`,
                       backgroundColor: metric.color
                     }} 
                   />

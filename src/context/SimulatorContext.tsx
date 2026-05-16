@@ -1,16 +1,32 @@
 "use client";
 
 import React, { createContext, useContext, useState, ReactNode } from "react";
-import { Metric, CustomPolicy } from "../types";
+import { Metric, CustomPolicy, MediaReactions } from "../types";
 import { initialMetrics } from "../data/initialData";
+
+const initialProvinces: Record<string, number> = {
+  antwerpen: 0,
+  limburg: 0,
+  oost_vlaanderen: 0,
+  west_vlaanderen: 0,
+  vlaams_brabant: 0,
+  hainaut: 0,
+  liege: 0,
+  namur: 0,
+  brabant_wallon: 0,
+  luxembourg: 0,
+  bruxelles: 0
+};
 
 interface SimulatorContextType {
   activePolicies: CustomPolicy[];
   baseMetrics: Metric[];
   currentMetrics: Metric[];
-  stabilityScore: number;
+  currentProvinces: Record<string, number>;
+  flemishSatisfaction: number;
+  walloonSatisfaction: number;
+  mediaReactions: MediaReactions | null;
   isLoading: boolean;
-  justification: string | null;
   submitCustomPolicy: (title: string, description: string) => Promise<void>;
   undoPolicy: (id: string) => void;
   resetSimulator: () => void;
@@ -22,8 +38,9 @@ export function SimulatorProvider({ children }: { children: ReactNode }) {
   const [activePolicies, setActivePolicies] = useState<CustomPolicy[]>([]);
   const [baseMetrics] = useState<Metric[]>(initialMetrics);
   const [currentMetrics, setCurrentMetrics] = useState<Metric[]>(initialMetrics);
+  const [currentProvinces, setCurrentProvinces] = useState<Record<string, number>>(initialProvinces);
+  const [mediaReactions, setMediaReactions] = useState<MediaReactions | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [justification, setJustification] = useState<string | null>(null);
 
   const submitCustomPolicy = async (title: string, description: string) => {
     setIsLoading(true);
@@ -61,15 +78,26 @@ export function SimulatorProvider({ children }: { children: ReactNode }) {
         })
       );
 
-      setJustification(data.justification);
+      setCurrentProvinces((prev) => {
+        const next = { ...prev };
+        for (const [prov, shift] of Object.entries(data.province_reactions || {})) {
+          next[prov] = Math.max(-100, Math.min(100, next[prov] + (shift as number)));
+        }
+        return next;
+      });
+
+      if (data.media_reactions) {
+        setMediaReactions(data.media_reactions);
+      }
 
       setActivePolicies((prev) => [
         {
           id: Math.random().toString(36).substr(2, 9),
           title,
           description,
-          justification: data.justification,
           shifts: data.metric_shifts,
+          provinceReactions: data.province_reactions,
+          mediaReactions: data.media_reactions,
         },
         ...prev,
       ]);
@@ -83,32 +111,50 @@ export function SimulatorProvider({ children }: { children: ReactNode }) {
 
   const undoPolicy = (id: string) => {
     const policyToUndo = activePolicies.find(p => p.id === id);
-    if (!policyToUndo || !policyToUndo.shifts) return;
+    if (!policyToUndo) return;
 
-    setCurrentMetrics((prev) =>
-      prev.map((m) => {
-        const shift = policyToUndo.shifts![m.id] || 0;
-        let newVal = m.value - shift; // Reverse the shift
-        newVal = Math.max(m.min, Math.min(m.max, newVal));
-        return { ...m, value: newVal };
-      })
-    );
+    if (policyToUndo.shifts) {
+      setCurrentMetrics((prev) =>
+        prev.map((m) => {
+          const shift = policyToUndo.shifts![m.id] || 0;
+          let newVal = m.value - shift; // Reverse the shift
+          newVal = Math.max(m.min, Math.min(m.max, newVal));
+          return { ...m, value: newVal };
+        })
+      );
+    }
+
+    if (policyToUndo.provinceReactions) {
+      setCurrentProvinces((prev) => {
+        const next = { ...prev };
+        for (const [prov, shift] of Object.entries(policyToUndo.provinceReactions!)) {
+          next[prov] = Math.max(-100, Math.min(100, next[prov] - (shift as number)));
+        }
+        return next;
+      });
+    }
 
     setActivePolicies((prev) => prev.filter(p => p.id !== id));
     
-    // Clear justification if it was the most recent one
+    // Reset media to the previous policy if it exists
     if (activePolicies[0]?.id === id) {
-      setJustification(null);
+      const prevPolicy = activePolicies[1];
+      setMediaReactions(prevPolicy?.mediaReactions || null);
     }
   };
 
   const resetSimulator = () => {
     setActivePolicies([]);
     setCurrentMetrics(initialMetrics);
-    setJustification(null);
+    setCurrentProvinces(initialProvinces);
+    setMediaReactions(null);
   };
 
-  const stabilityScore = currentMetrics.find((m) => m.id === "government_stability")?.value || 0;
+  const flemishProvinces = ["antwerpen", "limburg", "oost_vlaanderen", "west_vlaanderen", "vlaams_brabant"];
+  const walloonProvinces = ["hainaut", "liege", "namur", "brabant_wallon", "luxembourg"];
+
+  const flemishSatisfaction = flemishProvinces.reduce((sum, prov) => sum + currentProvinces[prov], 0) / flemishProvinces.length;
+  const walloonSatisfaction = walloonProvinces.reduce((sum, prov) => sum + currentProvinces[prov], 0) / walloonProvinces.length;
 
   return (
     <SimulatorContext.Provider
@@ -116,9 +162,11 @@ export function SimulatorProvider({ children }: { children: ReactNode }) {
         activePolicies,
         baseMetrics,
         currentMetrics,
-        stabilityScore,
+        currentProvinces,
+        flemishSatisfaction,
+        walloonSatisfaction,
+        mediaReactions,
         isLoading,
-        justification,
         submitCustomPolicy,
         undoPolicy,
         resetSimulator,

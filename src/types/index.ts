@@ -5,6 +5,14 @@ export interface Metric {
   min: number;
   max: number;
   color: string; // Hex or Tailwind color string for charts
+  unit?: string;
+}
+
+export interface MediaReactions {
+  socialist: string;
+  liberal: string;
+  nationalist: string;
+  christian_democrat: string;
 }
 
 export interface CustomPolicy {
@@ -13,6 +21,8 @@ export interface CustomPolicy {
   description: string;
   justification?: string;
   shifts?: Record<string, number>;
+  provinceReactions?: Record<string, number>;
+  mediaReactions?: MediaReactions;
 }
 
 export interface SimulatorState {
