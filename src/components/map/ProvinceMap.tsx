@@ -28,7 +28,7 @@ const mapProvinceKey = (name_nl?: string, reg_nis?: string) => {
 
 const getColor = (value: number, dynamicScale: number) => {
   const absValue = Math.abs(value);
-  if (absValue === 0) return "#1e293b";
+  if (absValue === 0) return "#e5e1d8";
 
   const hue = value > 0 ? 142 : 0; // Green or Red
   
@@ -112,12 +112,12 @@ export default function ProvinceMap() {
       </ComposableMap>
       
       {/* Legend */}
-      <div className="absolute bottom-4 left-4 bg-black/80 p-2 rounded text-[10px] text-white flex flex-col gap-1 border border-white/10 backdrop-blur">
+      <div className="absolute bottom-4 left-4 bg-white/80 p-2 rounded text-[10px] text-slate-900 flex flex-col gap-1 border border-black/5 backdrop-blur premium-shadow">
         <div className="flex items-center gap-2">
             <div className="w-3 h-3 bg-red-500 rounded-full"></div> Furious (-100)
         </div>
         <div className="flex items-center gap-2">
-            <div className="w-3 h-3 bg-slate-800 rounded-full border border-white/20"></div> Neutral (0)
+            <div className="w-3 h-3 bg-[#e5e1d8] rounded-full border border-black/10"></div> Neutral (0)
         </div>
         <div className="flex items-center gap-2">
             <div className="w-3 h-3 bg-green-500 rounded-full"></div> Thrilled (+100)
@@ -126,10 +126,10 @@ export default function ProvinceMap() {
 
       {/* Selected Province Info Box */}
       {selected && (
-        <div className="absolute top-4 right-4 bg-black/90 text-white p-4 min-w-[140px] rounded-lg shadow-[0_0_15px_rgba(0,0,0,0.5)] border border-white/10 backdrop-blur z-50">
-          <div className="text-[10px] uppercase tracking-widest text-slate-400 mb-1">Geselecteerd</div>
+        <div className="absolute top-4 right-4 bg-white/90 text-slate-900 p-4 min-w-[140px] rounded-lg shadow-xl border border-black/5 backdrop-blur z-50">
+          <div className="text-[10px] uppercase tracking-widest text-[#2B2B2C] mb-1">Geselecteerd</div>
           <div className="text-sm font-bold mb-2">{selected.name}</div>
-          <div className={`text-2xl font-black ${selected.value > 0 ? "text-green-400" : selected.value < 0 ? "text-red-400" : "text-white"}`}>
+          <div className={`text-2xl font-black ${selected.value > 0 ? "text-green-600" : selected.value < 0 ? "text-red-600" : "text-slate-900"}`}>
             {selected.value > 0 ? '+' : ''}{selected.value.toFixed(1)}%
           </div>
         </div>

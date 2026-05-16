@@ -26,24 +26,24 @@
 }
 
 :root {
-  --background: 0 0% 0%;
-  --foreground: 0 0% 98%;
-  --card: 0 0% 3%;
-  --card-foreground: 0 0% 98%;
-  --popover: 0 0% 3%;
-  --popover-foreground: 0 0% 98%;
+  --background: 40 32% 95%; /* #f7f3eb */
+  --foreground: 0 0% 10%; /* Deep Charcoal */
+  --card: 0 0% 100%; /* Pure White */
+  --card-foreground: 0 0% 10%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 0 0% 10%;
   --primary: 48 100% 50%; /* Belgian Yellow */
   --primary-foreground: 0 0% 0%;
   --secondary: 0 75% 50%; /* Belgian Red */
   --secondary-foreground: 0 0% 98%;
-  --muted: 0 0% 15%;
-  --muted-foreground: 0 0% 65%;
-  --accent: 0 0% 15%;
-  --accent-foreground: 0 0% 98%;
-  --destructive: 0 62.8% 30.6%;
+  --muted: 40 20% 90%;
+  --muted-foreground: 40 10% 40%;
+  --accent: 40 25% 92%;
+  --accent-foreground: 0 0% 10%;
+  --destructive: 0 84.2% 60.2%;
   --destructive-foreground: 0 0% 98%;
-  --border: 0 0% 15%;
-  --input: 0 0% 15%;
+  --border: 40 15% 85%; /* Subtle beige border */
+  --input: 40 15% 85%;
   --ring: 48 100% 50%;
   --radius: 0.75rem;
 }
@@ -56,13 +56,15 @@
 @layer base {
   * {
     border-color: var(--color-border);
+    scrollbar-width: thin;
+    scrollbar-color: #2B2B2C transparent;
   }
   body {
     background-color: var(--color-background);
     color: var(--color-foreground);
     background-image: 
-      radial-gradient(circle at 0% 0%, rgba(237, 41, 57, 0.05) 0%, transparent 50%),
-      radial-gradient(circle at 100% 100%, rgba(255, 215, 0, 0.05) 0%, transparent 50%);
+      radial-gradient(circle at 0% 0%, rgba(237, 41, 57, 0.03) 0%, transparent 50%),
+      radial-gradient(circle at 100% 100%, rgba(255, 215, 0, 0.03) 0%, transparent 50%);
   }
 }
 
@@ -76,11 +78,11 @@
 }
 
 .glass-card {
-  @apply bg-white/5 backdrop-blur-md border border-white/10;
+  @apply bg-white/70 backdrop-blur-md border border-black/5;
 }
 
 .premium-shadow {
-  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.08);
 }
 
 ::-webkit-scrollbar {
@@ -92,5 +94,10 @@
 }
 
 ::-webkit-scrollbar-thumb {
-  @apply bg-slate-700 rounded-full hover:bg-slate-600 transition-colors;
+  background-color: #2B2B2C;
+  border-radius: 20px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: #1a1a1b;
 }

@@ -20,24 +20,24 @@ export default function PolicySidebar() {
   };
 
   return (
-    <aside className="w-full lg:w-96 border-r border-white/5 bg-black p-4 flex flex-col h-full overflow-hidden">
-      <div className="flex-1 overflow-y-auto pr-2 space-y-8">
+    <aside className="w-full lg:w-96 border-r border-black/10 bg-[#f7f3eb] p-4 flex flex-col h-full overflow-hidden">
+      <div className="flex-1 overflow-y-scroll pr-6 space-y-8 scrollbar-gutter-stable">
         
         {/* Custom Policy Creator */}
         <section>
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xs font-black uppercase tracking-[0.2em] text-slate-500">Beleidsvorming</h2>
+            <h2 className="text-xs font-black uppercase tracking-[0.2em] text-[#2B2B2C]">Beleidsvorming</h2>
             <div className="flex gap-1 h-1 w-12">
               <div className="h-full w-1/3 bg-black" />
               <div className="h-full w-1/3 bg-[#FFD700]" />
               <div className="h-full w-1/3 bg-[#ED2939]" />
             </div>
           </div>
-          <Card className="bg-white/5 border-white/10 premium-shadow">
+          <Card className="bg-white border-black/5 premium-shadow">
             <CardContent className="p-5">
               <form onSubmit={handleSubmit} className="space-y-5">
                 <div>
-                  <label htmlFor="title" className="block text-[10px] font-black uppercase tracking-wider text-slate-400 mb-2">
+                  <label htmlFor="title" className="block text-[10px] font-black uppercase tracking-wider text-[#2B2B2C] mb-2">
                     Titel van het beleid
                   </label>
                   <input
@@ -46,13 +46,13 @@ export default function PolicySidebar() {
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
                     placeholder="bijv. Kilometerheffing invoeren"
-                    className="w-full bg-black border border-white/10 rounded-lg px-4 py-3 text-sm text-white placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-[#FFD700]/50 focus:border-[#FFD700]/50 transition-all"
+                    className="w-full bg-white border border-black/10 rounded-lg px-4 py-3 text-sm text-slate-900 placeholder-[#2B2B2C]/60 focus:outline-none focus:ring-2 focus:ring-[#FFD700]/50 focus:border-[#FFD700]/50 transition-all"
                     disabled={isLoading}
                     required
                   />
                 </div>
                 <div>
-                  <label htmlFor="description" className="block text-[10px] font-black uppercase tracking-wider text-slate-400 mb-2">
+                  <label htmlFor="description" className="block text-[10px] font-black uppercase tracking-wider text-[#2B2B2C] mb-2">
                     Beschrijving / Impact
                   </label>
                   <textarea
@@ -61,7 +61,7 @@ export default function PolicySidebar() {
                     onChange={(e) => setDescription(e.target.value)}
                     placeholder="Wat wil je bereiken met dit beleid?"
                     rows={4}
-                    className="w-full bg-black border border-white/10 rounded-lg px-4 py-3 text-sm text-white placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-[#FFD700]/50 focus:border-[#FFD700]/50 resize-none transition-all"
+                    className="w-full bg-white border border-black/10 rounded-lg px-4 py-3 text-sm text-slate-900 placeholder-[#2B2B2C]/60 focus:outline-none focus:ring-2 focus:ring-[#FFD700]/50 focus:border-[#FFD700]/50 transition-all"
                     disabled={isLoading}
                     required
                   />
@@ -69,7 +69,7 @@ export default function PolicySidebar() {
                 <Button 
                   type="submit" 
                   disabled={isLoading || !title.trim() || !description.trim()} 
-                  className="w-full bg-gradient-to-r from-black via-[#FFD700] to-[#ED2939] text-black font-black uppercase tracking-widest hover:opacity-90 transition-opacity border-none h-12"
+                  className="w-full bg-gradient-to-r from-slate-950 via-[#FFD700] to-[#ED2939] text-white font-black uppercase tracking-widest hover:opacity-90 transition-opacity border-none h-12 shadow-md"
                 >
                   {isLoading ? (
                     <div className="flex items-center gap-2">
@@ -92,7 +92,7 @@ export default function PolicySidebar() {
         {mediaReactions && (
           <section className="animate-in fade-in slide-in-from-bottom-4 duration-500">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xs font-black uppercase tracking-[0.2em] text-slate-500">Media Reacties</h2>
+              <h2 className="text-xs font-black uppercase tracking-[0.2em] text-[#2B2B2C]">Media Reacties</h2>
             </div>
             <div className="grid grid-cols-1 gap-3">
               {/* Socialist */}
@@ -103,21 +103,21 @@ export default function PolicySidebar() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="p-3 pt-1">
-                  <p className="text-xs text-white font-medium italic">
+                  <p className="text-xs text-slate-800 font-medium italic">
                     "{mediaReactions.socialist}"
                   </p>
                 </CardContent>
               </Card>
 
               {/* Liberal */}
-              <Card className="bg-[#0047AB]/10 border-[#0047AB]/20 overflow-hidden relative">
+              <Card className="bg-[#0047AB]/5 border-[#0047AB]/10 overflow-hidden relative">
                 <CardHeader className="p-3 pb-1">
-                  <CardTitle className="text-[9px] font-black text-[#3b82f6] uppercase tracking-widest">
+                  <CardTitle className="text-[9px] font-black text-[#0047AB] uppercase tracking-widest">
                     Liberale Pers
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="p-3 pt-1">
-                  <p className="text-xs text-white font-medium italic">
+                  <p className="text-xs text-slate-800 font-medium italic">
                     "{mediaReactions.liberal}"
                   </p>
                 </CardContent>
@@ -126,26 +126,26 @@ export default function PolicySidebar() {
               {/* Nationalist/Conservative */}
               <Card className="bg-[#FFD700]/10 border-[#FFD700]/20 overflow-hidden relative">
                 <CardHeader className="p-3 pb-1">
-                  <CardTitle className="text-[9px] font-black text-[#FFD700] uppercase tracking-widest">
+                  <CardTitle className="text-[9px] font-black text-[#857200] uppercase tracking-widest">
                     Nationalistische Pers
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="p-3 pt-1">
-                  <p className="text-xs text-white font-medium italic">
+                  <p className="text-xs text-slate-800 font-medium italic">
                     "{mediaReactions.nationalist}"
                   </p>
                 </CardContent>
               </Card>
 
               {/* Christian Democrat */}
-              <Card className="bg-[#FF8C00]/10 border-[#FF8C00]/20 overflow-hidden relative">
+              <Card className="bg-[#FF8C00]/5 border-[#FF8C00]/10 overflow-hidden relative">
                 <CardHeader className="p-3 pb-1">
-                  <CardTitle className="text-[9px] font-black text-[#f97316] uppercase tracking-widest">
+                  <CardTitle className="text-[9px] font-black text-[#c2410c] uppercase tracking-widest">
                     Christendemocratische Pers
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="p-3 pt-1">
-                  <p className="text-xs text-white font-medium italic">
+                  <p className="text-xs text-slate-800 font-medium italic">
                     "{mediaReactions.christian_democrat}"
                   </p>
                 </CardContent>
@@ -157,24 +157,24 @@ export default function PolicySidebar() {
         {/* Active Policies History */}
         {activePolicies.length > 0 && (
           <section>
-            <h2 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 mb-4">Wetgevende Geschiedenis</h2>
+            <h2 className="text-[10px] font-black uppercase tracking-[0.2em] text-[#2B2B2C] mb-4">Wetgevende Geschiedenis</h2>
             <div className="space-y-4">
               {activePolicies.map((policy) => {
                 const isSelected = policy.id === selectedPolicyId;
                 return (
                 <Card 
                   key={policy.id} 
-                  className={`bg-white/5 hover:border-white/20 cursor-pointer transition-all group overflow-hidden ${isSelected ? 'border-white/40 shadow-[0_0_15px_rgba(255,255,255,0.1)]' : 'border-white/5'}`}
+                  className={`bg-white hover:border-black/20 cursor-pointer transition-all group overflow-hidden ${isSelected ? 'border-black/20 shadow-[0_5px_20px_rgba(0,0,0,0.05)]' : 'border-black/5'}`}
                   onClick={() => selectPolicy(policy.id)}
                 >
                   <div className={`h-1 w-full flex transition-opacity ${isSelected ? 'opacity-100' : 'opacity-30 group-hover:opacity-60'}`}>
-                    <div className="h-full w-1/3 bg-black" />
+                    <div className="h-full w-1/3 bg-slate-900" />
                     <div className="h-full w-1/3 bg-[#FFD700]" />
                     <div className="h-full w-1/3 bg-[#ED2939]" />
                   </div>
                   <CardHeader className="p-4 pb-2 flex flex-row items-start justify-between">
                     <div>
-                      <CardTitle className="text-sm font-bold text-slate-100">
+                      <CardTitle className="text-sm font-bold text-slate-900">
                         {policy.title}
                       </CardTitle>
                     </div>
@@ -185,14 +185,14 @@ export default function PolicySidebar() {
                         e.stopPropagation();
                         deletePolicy(policy.id);
                       }}
-                      className="h-8 w-8 text-slate-500 hover:text-[#ED2939] hover:bg-red-500/10 transition-colors"
+                      className="h-8 w-8 text-[#2B2B2C] hover:text-[#ED2939] hover:bg-red-500/10 transition-colors"
                       title="Beleid verwijderen"
                     >
                       <Trash2 className="w-4 h-4" />
                     </Button>
                   </CardHeader>
                   <CardContent className="p-4 pt-0">
-                    <p className="text-[11px] text-slate-500 line-clamp-2">
+                    <p className="text-[11px] text-[#2B2B2C] line-clamp-2">
                       {policy.description}
                     </p>
                   </CardContent>

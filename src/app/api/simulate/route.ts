@@ -49,9 +49,6 @@ export async function POST(request: Request) {
       );
     }
 
-    const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
-
     const prompt = `You are the core simulation engine of a Belgian Political Simulator. The user is proposing a CUSTOM policy.
 
 [IMPACT SCALING RULES - THE T-DISTRIBUTION LOGIC]
@@ -77,17 +74,8 @@ Calculate the impact and return ONLY a strict RAW JSON object in this format wit
     "climate_progress": "Uitleg hier"
   },
   "province_reactions": {
-    "antwerpen": 5,
-    "limburg": 5,
-    "oost_vlaanderen": 5,
-    "west_vlaanderen": 5,
-    "vlaams_brabant": 5,
-    "hainaut": -5,
-    "liege": -5,
-    "namur": -5,
-    "brabant_wallon": -5,
-    "luxembourg": -5,
-    "bruxelles": 0
+    "antwerpen": 5, "limburg": 5, "oost_vlaanderen": 5, "west_vlaanderen": 5, "vlaams_brabant": 5,
+    "hainaut": -5, "liege": -5, "namur": -5, "brabant_wallon": -5, "luxembourg": -5, "bruxelles": 0
   },
   "province_explanations": {
     "flanders": "Uitleg over Vlaanderen",
@@ -95,10 +83,7 @@ Calculate the impact and return ONLY a strict RAW JSON object in this format wit
     "brussels": "Uitleg over Brussel"
   },
   "media_reactions": {
-    "socialist": "Reactie",
-    "liberal": "Reactie",
-    "nationalist": "Reactie",
-    "christian_democrat": "Reactie"
+    "socialist": "Reactie", "liberal": "Reactie", "nationalist": "Reactie", "christian_democrat": "Reactie"
   }
 }
 
@@ -111,7 +96,24 @@ Here is the actual INPUT:
   }
 }`;
 
-    const result = await model.generateContent(prompt);
+    const genAI = new GoogleGenerativeAI(apiKey);
+    let result;
+
+    try {
+      // Primary attempt with gemini-2.5-flash
+      const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+      result = await model.generateContent(prompt);
+    } catch (error) {
+      console.warn("Gemini 2.5-flash failed, falling back to 3.0-flash...", error);
+      try {
+        // Fallback attempt with gemini-3.0-flash
+        const modelFallback = genAI.getGenerativeModel({ model: "gemini-3.0-flash" });
+        result = await modelFallback.generateContent(prompt);
+      } catch (fallbackError: any) {
+        throw new Error(`Both Gemini 2.5 and 3.0 failed: ${fallbackError.message}`);
+      }
+    }
+
     let responseText = result.response.text();
 
     // More robust JSON extraction
