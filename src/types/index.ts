@@ -7,20 +7,14 @@ export interface Metric {
   color: string; // Hex or Tailwind color string for charts
 }
 
-export interface PolicyImpact {
-  metricId: string;
-  valueChange: number; // Positive or negative impact on the metric
-}
-
-export interface Policy {
+export interface CustomPolicy {
   id: string;
   title: string;
   description: string;
-  isActive: boolean;
-  impacts: PolicyImpact[];
+  justification?: string;
 }
 
 export interface SimulatorState {
-  policies: Policy[];
+  policies: CustomPolicy[];
   baseMetrics: Metric[];
 }

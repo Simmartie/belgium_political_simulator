@@ -1,36 +1,29 @@
 "use client";
 
 import React, { createContext, useContext, useState, ReactNode } from "react";
-import { Metric, Policy } from "../types";
-import { initialMetrics, initialPolicies } from "../data/initialData";
+import { Metric, CustomPolicy } from "../types";
+import { initialMetrics } from "../data/initialData";
 
 interface SimulatorContextType {
-  policies: Policy[];
+  activePolicies: CustomPolicy[];
   baseMetrics: Metric[];
   currentMetrics: Metric[];
   stabilityScore: number;
   isLoading: boolean;
   justification: string | null;
-  togglePolicy: (id: string) => Promise<void>;
+  submitCustomPolicy: (title: string, description: string) => Promise<void>;
 }
 
 const SimulatorContext = createContext<SimulatorContextType | undefined>(undefined);
 
 export function SimulatorProvider({ children }: { children: ReactNode }) {
-  const [policies, setPolicies] = useState<Policy[]>(initialPolicies);
+  const [activePolicies, setActivePolicies] = useState<CustomPolicy[]>([]);
   const [baseMetrics] = useState<Metric[]>(initialMetrics);
   const [currentMetrics, setCurrentMetrics] = useState<Metric[]>(initialMetrics);
   const [isLoading, setIsLoading] = useState(false);
   const [justification, setJustification] = useState<string | null>(null);
 
-  const togglePolicy = async (id: string) => {
-    const policyIndex = policies.findIndex((p) => p.id === id);
-    if (policyIndex === -1) return;
-
-    const policy = policies[policyIndex];
-    const newIsActive = !policy.isActive;
-    const action = newIsActive ? "ENABLE" : "DISABLE";
-
+  const submitCustomPolicy = async (title: string, description: string) => {
     setIsLoading(true);
 
     try {
@@ -45,8 +38,8 @@ export function SimulatorProvider({ children }: { children: ReactNode }) {
         body: JSON.stringify({
           currentMetrics: payloadMetrics,
           policy: {
-            title: policy.title,
-            action: action,
+            title,
+            description,
           },
         }),
       });
@@ -66,11 +59,18 @@ export function SimulatorProvider({ children }: { children: ReactNode }) {
         })
       );
 
-      setJustification(data.justification);
+      const responseJustification = data.justification;
+      setJustification(responseJustification);
 
-      setPolicies((prev) =>
-        prev.map((p) => (p.id === id ? { ...p, isActive: newIsActive } : p))
-      );
+      setActivePolicies((prev) => [
+        {
+          id: Math.random().toString(36).substr(2, 9),
+          title,
+          description,
+          justification: responseJustification,
+        },
+        ...prev,
+      ]);
     } catch (error) {
       console.error(error);
       alert("Simulation failed. Check console or API key.");
@@ -84,13 +84,13 @@ export function SimulatorProvider({ children }: { children: ReactNode }) {
   return (
     <SimulatorContext.Provider
       value={{
-        policies,
+        activePolicies,
         baseMetrics,
         currentMetrics,
         stabilityScore,
         isLoading,
         justification,
-        togglePolicy,
+        submitCustomPolicy,
       }}
     >
       {children}
