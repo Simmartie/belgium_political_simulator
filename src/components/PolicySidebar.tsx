@@ -4,10 +4,10 @@ import React, { useState } from "react";
 import { useSimulator } from "../context/SimulatorContext";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "./ui/card";
 import { Button } from "./ui/button";
-import { Undo2, Plus, AlertCircle } from "lucide-react";
+import { Trash2, Plus, AlertCircle } from "lucide-react";
 
 export default function PolicySidebar() {
-  const { activePolicies, submitCustomPolicy, isLoading, mediaReactions, undoPolicy } = useSimulator();
+  const { activePolicies, submitCustomPolicy, isLoading, mediaReactions, selectPolicy, deletePolicy, selectedPolicyId } = useSimulator();
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
 
@@ -159,9 +159,15 @@ export default function PolicySidebar() {
           <section>
             <h2 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 mb-4">Wetgevende Geschiedenis</h2>
             <div className="space-y-4">
-              {activePolicies.map((policy) => (
-                <Card key={policy.id} className="bg-white/5 border-white/5 hover:border-white/10 transition-all group overflow-hidden">
-                  <div className="h-1 w-full flex opacity-30 group-hover:opacity-100 transition-opacity">
+              {activePolicies.map((policy) => {
+                const isSelected = policy.id === selectedPolicyId;
+                return (
+                <Card 
+                  key={policy.id} 
+                  className={`bg-white/5 hover:border-white/20 cursor-pointer transition-all group overflow-hidden ${isSelected ? 'border-white/40 shadow-[0_0_15px_rgba(255,255,255,0.1)]' : 'border-white/5'}`}
+                  onClick={() => selectPolicy(policy.id)}
+                >
+                  <div className={`h-1 w-full flex transition-opacity ${isSelected ? 'opacity-100' : 'opacity-30 group-hover:opacity-60'}`}>
                     <div className="h-full w-1/3 bg-black" />
                     <div className="h-full w-1/3 bg-[#FFD700]" />
                     <div className="h-full w-1/3 bg-[#ED2939]" />
@@ -175,11 +181,14 @@ export default function PolicySidebar() {
                     <Button
                       variant="ghost"
                       size="icon"
-                      onClick={() => undoPolicy(policy.id)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        deletePolicy(policy.id);
+                      }}
                       className="h-8 w-8 text-slate-500 hover:text-[#ED2939] hover:bg-red-500/10 transition-colors"
-                      title="Beleid terugdraaien"
+                      title="Beleid verwijderen"
                     >
-                      <Undo2 className="w-4 h-4" />
+                      <Trash2 className="w-4 h-4" />
                     </Button>
                   </CardHeader>
                   <CardContent className="p-4 pt-0">
@@ -188,7 +197,7 @@ export default function PolicySidebar() {
                     </p>
                   </CardContent>
                 </Card>
-              ))}
+              )})}
             </div>
           </section>
         )}

@@ -21,7 +21,9 @@ export interface CustomPolicy {
   description: string;
   justification?: string;
   shifts?: Record<string, number>;
+  metricExplanations?: Record<string, string>;
   provinceReactions?: Record<string, number>;
+  provinceExplanations?: Record<string, string>;
   mediaReactions?: MediaReactions;
 }
 

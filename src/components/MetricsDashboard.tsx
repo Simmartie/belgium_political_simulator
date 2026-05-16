@@ -16,7 +16,8 @@ import {
 } from "recharts";
 
 export default function MetricsDashboard() {
-  const { currentMetrics, flemishSatisfaction, walloonSatisfaction } = useSimulator();
+  const { currentMetrics, currentProvinces, flemishSatisfaction, walloonSatisfaction, activePolicies } = useSimulator();
+  const latestPolicy = activePolicies[0];
 
   // Filter out government_stability for the main chart, and map it so we show regional satisfaction
   const chartData = [
@@ -90,10 +91,29 @@ export default function MetricsDashboard() {
                     <div>
                         <h3 className="text-xl font-bold text-white mb-2 text-[#f59e0b]">Vlaanderen</h3>
                         <div className="text-4xl font-black">{flemishSatisfaction.toFixed(1)}%</div>
+                        {latestPolicy?.provinceExplanations?.flanders && (
+                          <p className="text-xs text-amber-500/80 mt-2 italic leading-relaxed">
+                            "{latestPolicy.provinceExplanations.flanders}"
+                          </p>
+                        )}
                     </div>
                     <div>
                         <h3 className="text-xl font-bold text-white mb-2 text-[#ef4444]">Wallonië</h3>
                         <div className="text-4xl font-black">{walloonSatisfaction.toFixed(1)}%</div>
+                        {latestPolicy?.provinceExplanations?.wallonia && (
+                          <p className="text-xs text-red-500/80 mt-2 italic leading-relaxed">
+                            "{latestPolicy.provinceExplanations.wallonia}"
+                          </p>
+                        )}
+                    </div>
+                    <div>
+                        <h3 className="text-xl font-bold text-white mb-2 text-[#3b82f6]">Brussel</h3>
+                        <div className="text-4xl font-black">{(currentProvinces.bruxelles).toFixed(1)}%</div>
+                        {latestPolicy?.provinceExplanations?.brussels && (
+                          <p className="text-xs text-blue-400/80 mt-2 italic leading-relaxed">
+                            "{latestPolicy.provinceExplanations.brussels}"
+                          </p>
+                        )}
                     </div>
                 </div>
             </div>
@@ -128,12 +148,30 @@ export default function MetricsDashboard() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-5 pt-0">
-                <div className="flex items-baseline gap-2">
-                  <span className="text-3xl font-black tracking-tighter text-white">
-                    {metric.value.toFixed(1)}
-                  </span>
-                  <span className="text-xs font-bold text-slate-500 uppercase">{metric.unit}</span>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-3xl font-black tracking-tighter text-white">
+                      {metric.value.toFixed(1)}
+                    </span>
+                    <span className="text-xs font-bold text-slate-500 uppercase">{metric.unit}</span>
+                  </div>
+                  {latestPolicy?.shifts?.[metric.id] !== undefined && (
+                    <div className={`text-xs font-black px-2 py-1 rounded ${
+                      latestPolicy.shifts[metric.id]! > 0 ? 'bg-green-500/20 text-green-400' : 
+                      latestPolicy.shifts[metric.id]! < 0 ? 'bg-red-500/20 text-red-400' : 
+                      'bg-slate-500/20 text-slate-400'
+                    }`}>
+                      {latestPolicy.shifts[metric.id]! > 0 ? '+' : ''}{latestPolicy.shifts[metric.id]!.toFixed(1)}
+                    </div>
+                  )}
                 </div>
+
+                {latestPolicy?.metricExplanations?.[metric.id] && (
+                  <p className="mt-3 text-[11px] leading-relaxed text-slate-400 font-medium italic border-l-2 border-white/10 pl-3">
+                    {latestPolicy.metricExplanations[metric.id]}
+                  </p>
+                )}
+
                 <div className="mt-4 h-1 w-full bg-white/5 rounded-full overflow-hidden">
                   <div 
                     className="h-full transition-all duration-1000 ease-out shadow-[0_0_10px_rgba(0,0,0,0.5)]" 
