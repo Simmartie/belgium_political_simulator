@@ -7,8 +7,8 @@ export async function POST(request: Request) {
     const { currentMetrics, policy } = body;
 
     // MOCK MODE: If title or description contains "DEBUG", return static data immediately
-    const isDebug = policy.title.toUpperCase().includes("DEBUG") || 
-                    policy.description.toUpperCase().includes("DEBUG");
+    const isDebug = policy.title.toUpperCase().includes("DEBUG") ||
+      policy.description.toUpperCase().includes("DEBUG");
 
     if (isDebug) {
       return NextResponse.json({
@@ -98,21 +98,25 @@ Here is the actual INPUT:
 
     const genAI = new GoogleGenerativeAI(apiKey);
     let result;
+    let usedModel = "gemini-2.5-flash";
 
     try {
       // Primary attempt with gemini-2.5-flash
       const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
       result = await model.generateContent(prompt);
-    } catch (error) {
-      console.warn("Gemini 2.5-flash failed, falling back to 3.0-flash...", error);
+    } catch (error: any) {
+      console.warn("Gemini 2.5-flash failed, switching to 3-flash...", error.message || error);
       try {
-        // Fallback attempt with gemini-3.0-flash
-        const modelFallback = genAI.getGenerativeModel({ model: "gemini-3.0-flash" });
+        // Fallback attempt with gemini-3-flash-preview
+        usedModel = "gemini-3-flash-preview";
+        const modelFallback = genAI.getGenerativeModel({ model: "gemini-3-flash-preview" });
         result = await modelFallback.generateContent(prompt);
       } catch (fallbackError: any) {
-        throw new Error(`Both Gemini 2.5 and 3.0 failed: ${fallbackError.message}`);
+        throw new Error(`Both Gemini 2.5 and 3-flash-preview failed. Last error: ${fallbackError.message}`);
       }
     }
+
+    console.log(`Simulation successful using model: ${usedModel}`);
 
     let responseText = result.response.text();
 
@@ -121,7 +125,7 @@ Here is the actual INPUT:
     if (!jsonMatch) {
       throw new Error("AI returned invalid format: " + responseText);
     }
-    
+
     const parsedData = JSON.parse(jsonMatch[0]);
 
     return NextResponse.json(parsedData);
