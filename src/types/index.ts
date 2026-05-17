@@ -13,6 +13,8 @@ export interface MediaReactions {
   liberal: string;
   nationalist: string;
   christian_democrat: string;
+  ecological?: string;
+  communist?: string;
 }
 
 export interface CustomPolicy {

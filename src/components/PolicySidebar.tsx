@@ -150,6 +150,38 @@ export default function PolicySidebar() {
                   </p>
                 </CardContent>
               </Card>
+
+              {/* Ecological */}
+              {mediaReactions.ecological && (
+                <Card className="bg-[#22c55e]/5 border-[#22c55e]/10 overflow-hidden relative">
+                  <CardHeader className="p-3 pb-1">
+                    <CardTitle className="text-[9px] font-black text-[#16a34a] uppercase tracking-widest">
+                      Ecologische Pers
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="p-3 pt-1">
+                    <p className="text-xs text-slate-800 font-medium italic">
+                      "{mediaReactions.ecological}"
+                    </p>
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Communist */}
+              {mediaReactions.communist && (
+                <Card className="bg-[#b91c1c]/5 border-[#b91c1c]/10 overflow-hidden relative">
+                  <CardHeader className="p-3 pb-1">
+                    <CardTitle className="text-[9px] font-black text-[#b91c1c] uppercase tracking-widest">
+                      Communistische Pers
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="p-3 pt-1">
+                    <p className="text-xs text-slate-800 font-medium italic">
+                      "{mediaReactions.communist}"
+                    </p>
+                  </CardContent>
+                </Card>
+              )}
             </div>
           </section>
         )}

@@ -5,9 +5,12 @@ import { useSimulator } from "../context/SimulatorContext";
 import { Progress } from "./ui/progress";
 import { Button } from "./ui/button";
 import { RotateCcw } from "lucide-react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 export default function TopBar() {
   const { resetSimulator } = useSimulator();
+  const pathname = usePathname();
 
   return (
     <header className="h-16 border-b border-black/10 bg-[#f7f3eb]/90 backdrop-blur-md flex items-center justify-between px-6 sticky top-0 z-50">
@@ -26,10 +29,25 @@ export default function TopBar() {
         </div>
       </div>
 
+      <div className="flex bg-white/50 p-1 rounded-md border border-black/10">
+        <Link 
+          href="/" 
+          className={`px-4 py-1.5 text-xs font-bold uppercase tracking-wider rounded-sm transition-colors ${pathname === "/" ? "bg-slate-900 text-white shadow" : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"}`}
+        >
+          Beleid Maker
+        </Link>
+        <Link 
+          href="/partijprogramma" 
+          className={`px-4 py-1.5 text-xs font-bold uppercase tracking-wider rounded-sm transition-colors ${pathname === "/partijprogramma" ? "bg-slate-900 text-white shadow" : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"}`}
+        >
+          Partijprogramma
+        </Link>
+      </div>
+
       <div className="flex items-center gap-8">
-        <div className="flex flex-col items-end w-48 lg:w-64">
+        <div className="flex flex-col items-end w-32 lg:w-48 hidden md:flex">
           <div className="flex justify-between w-full mb-1">
-            <span className="text-[10px] uppercase tracking-widest font-bold text-[#2B2B2C]">Belgische Politieke Simulator</span>
+            <span className="text-[10px] uppercase tracking-widest font-bold text-[#2B2B2C]">Simulator V2</span>
           </div>
         </div>
 

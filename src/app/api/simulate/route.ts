@@ -14,11 +14,15 @@ export async function POST(request: Request) {
       return NextResponse.json({
         "metric_shifts": {
           "budget_deficit": -5.5,
+          "gdp_total": 12.0,
+          "inflation_rate": 0.5,
           "purchasing_power_index": 12.0,
           "climate_progress": 8.5
         },
         "metric_explanations": {
           "budget_deficit": "DEBUG: Dit is een test-uitleg voor het begrotingstekort. De kosten zijn gedaald door simulatie.",
+          "gdp_total": "DEBUG: De economie groeit aanzienlijk.",
+          "inflation_rate": "DEBUG: Er is een lichte stijging van de inflatie.",
           "purchasing_power_index": "DEBUG: De koopkracht stijgt fors in deze testmodus om de UI-badges te verifiëren.",
           "climate_progress": "DEBUG: Klimaatdoelen worden sneller gehaald in deze gesimuleerde omgeving."
         },
@@ -35,7 +39,9 @@ export async function POST(request: Request) {
           "socialist": "Een technocratisch experiment dat de sociale realiteit negeert.",
           "liberal": "Eindelijk een efficiënte aanpak, zelfs als het slechts een test is.",
           "nationalist": "Een interessant resultaat, maar waar blijft de regionale autonomie?",
-          "christian_democrat": "We moeten de balans bewareen tussen simulatie en realiteit."
+          "christian_democrat": "We moeten de balans bewareen tussen simulatie en realiteit.",
+          "ecological": "Een interessant begin, maar het lost de ecologische crisis niet fundamenteel op.",
+          "communist": "Dit beleid dient de belangen van het kapitaal en negeert de werkende klasse!"
         }
       });
     }
@@ -65,11 +71,15 @@ Calculate the impact and return ONLY a strict RAW JSON object in this format wit
 {
   "metric_shifts": {
     "budget_deficit": 0.5,
+    "gdp_total": 2.5,
+    "inflation_rate": 0.1,
     "purchasing_power_index": -1.2,
     "climate_progress": 0.2
   },
   "metric_explanations": {
     "budget_deficit": "Uitleg hier",
+    "gdp_total": "Uitleg hier",
+    "inflation_rate": "Uitleg hier",
     "purchasing_power_index": "Uitleg hier",
     "climate_progress": "Uitleg hier"
   },
@@ -83,7 +93,7 @@ Calculate the impact and return ONLY a strict RAW JSON object in this format wit
     "brussels": "Uitleg over Brussel"
   },
   "media_reactions": {
-    "socialist": "Reactie", "liberal": "Reactie", "nationalist": "Reactie", "christian_democrat": "Reactie"
+    "socialist": "Reactie", "liberal": "Reactie", "nationalist": "Reactie", "christian_democrat": "Reactie", "ecological": "Reactie", "communist": "Reactie"
   }
 }
 

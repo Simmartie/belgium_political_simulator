@@ -4,124 +4,13 @@ import React from "react";
 import { useSimulator } from "../context/SimulatorContext";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import ProvinceMap from "./map/ProvinceMap";
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  Cell,
-  LabelList,
-} from "recharts";
 
 export default function MetricsDashboard() {
   const { currentMetrics, currentProvinces, flemishSatisfaction, walloonSatisfaction, activePolicies } = useSimulator();
   const latestPolicy = activePolicies[0];
 
-  // Filter out government_stability for the main chart, and map it so we show regional satisfaction
-  const chartData = [
-    ...currentMetrics
-      .filter((m) => m.id !== "flemish_satisfaction" && m.id !== "walloon_satisfaction" && m.id !== "government_stability")
-      .map(m => ({ 
-        name: m.name, 
-        value: m.value, 
-        color: m.color,
-        shift: latestPolicy?.shifts?.[m.id] || 0
-      })),
-    { name: "Flemish Satisfaction", value: flemishSatisfaction, color: "#d97706", shift: flemishSatisfaction },
-    { name: "Walloon Satisfaction", value: walloonSatisfaction, color: "#ef4444", shift: walloonSatisfaction },
-  ];
-
   return (
     <div className="flex-1 p-6 lg:p-10 space-y-10 overflow-y-scroll bg-transparent">
-      {/* Main Chart Section */}
-      <section>
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-sm font-black uppercase tracking-[0.3em] text-[#2B2B2C] flex items-center gap-3">
-            <span className="w-8 h-[2px] bg-[#FFD700]" />
-            Nationale Indicatoren
-          </h2>
-        </div>
-        <Card className="bg-white border-black/5 premium-shadow overflow-hidden">
-          <CardContent className="p-6 h-[400px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={chartData} margin={{ top: 20, right: 30, left: 0, bottom: 40 }}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(0,0,0,0.05)" />
-                <XAxis 
-                  dataKey="name" 
-                  axisLine={false} 
-                  tickLine={false} 
-                  tick={{ fill: "#2B2B2C", fontSize: 10, fontWeight: 800, dy: 10 }}
-                  interval={0}
-                  height={60}
-                />
-                <YAxis 
-                  axisLine={false} 
-                  tickLine={false} 
-                  tick={{ fill: "#2B2B2C", fontSize: 10 }}
-                  padding={{ top: 20, bottom: 20 }}
-                />
-                <Tooltip
-                  cursor={{ fill: "rgba(0,0,0,0.02)" }}
-                  contentStyle={{
-                    backgroundColor: "#fff",
-                    border: "1px solid rgba(0,0,0,0.05)",
-                    borderRadius: "8px",
-                    fontSize: "12px",
-                    color: "#000",
-                    fontWeight: "bold",
-                  }}
-                />
-                <Bar dataKey="value" radius={[4, 4, 0, 0]} barSize={40}>
-                  {chartData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} />
-                  ))}
-                  <LabelList 
-                    dataKey="shift" 
-                    content={(props: any) => {
-                      const { x, y, width, height, value } = props;
-                      if (value === undefined || value === null || value === 0) return null;
-                      
-                      const numValue = Number(value);
-                      const isShiftPositive = numValue > 0;
-                      
-                      // Robust positioning:
-                      // Top edge of the bar is always min(y, y + height)
-                      // Bottom edge of the bar is always max(y, y + height)
-                      const topEdge = Math.min(y, y + height);
-                      const bottomEdge = Math.max(y, y + height);
-                      
-                      // If the shift is positive, we usually want it above. 
-                      // But the bar direction is the primary decider for "outside".
-                      // If the bar value is positive (topEdge < axis), we go above.
-                      // If the bar value is negative (bottomEdge > axis), we go below.
-                      // We'll use the shift value as a proxy if payload.value isn't easily accessible,
-                      // but for regional metrics, shift IS the value.
-                      const yPos = numValue >= 0 ? topEdge - 10 : bottomEdge + 15;
-                      
-                      return (
-                        <text 
-                          x={x + width / 2} 
-                          y={yPos} 
-                          fill={isShiftPositive ? "#15803d" : "#b91c1c"} 
-                          textAnchor="middle" 
-                          fontSize={10} 
-                          fontWeight="bold"
-                        >
-                          {isShiftPositive ? `+${numValue.toFixed(1)}` : numValue.toFixed(1)}
-                        </text>
-                      );
-                    }}
-                  />
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
-      </section>
-
       {/* Map Section */}
       <section>
         <div className="flex items-center justify-between mb-6">
