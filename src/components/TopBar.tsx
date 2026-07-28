@@ -9,7 +9,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 export default function TopBar() {
-  const { resetSimulator } = useSimulator();
+  const simulator = useSimulator();
   const pathname = usePathname();
 
   return (
@@ -42,6 +42,12 @@ export default function TopBar() {
         >
           Partijprogramma
         </Link>
+        <Link 
+          href="/career" 
+          className={`px-4 py-1.5 text-xs font-bold uppercase tracking-wider rounded-sm transition-colors ${pathname === "/career" ? "bg-slate-900 text-white shadow" : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"}`}
+        >
+          Career Mode
+        </Link>
       </div>
 
       <div className="flex items-center gap-8">
@@ -51,15 +57,17 @@ export default function TopBar() {
           </div>
         </div>
 
-        <Button 
-          variant="outline" 
-          size="sm" 
-          onClick={resetSimulator}
-          className="border-black/10 bg-white hover:bg-slate-50 text-slate-900 gap-2 text-xs font-bold uppercase tracking-wider premium-shadow"
-        >
-          <RotateCcw className="w-3 h-3" />
-          Opnieuw Beginnen
-        </Button>
+        {simulator?.resetSimulator && (
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={simulator.resetSimulator}
+            className="border-black/10 bg-white hover:bg-slate-50 text-slate-900 gap-2 text-xs font-bold uppercase tracking-wider premium-shadow"
+          >
+            <RotateCcw className="w-3 h-3" />
+            Opnieuw Beginnen
+          </Button>
+        )}
       </div>
     </header>
   );

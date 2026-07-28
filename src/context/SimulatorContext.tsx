@@ -162,10 +162,23 @@ export function SimulatorProvider({ children }: { children: ReactNode }) {
   );
 }
 
+const defaultContextValue: SimulatorContextType = {
+  activePolicies: [],
+  baseMetrics: initialMetrics,
+  currentMetrics: initialMetrics,
+  currentProvinces: initialProvinces,
+  flemishSatisfaction: 0,
+  walloonSatisfaction: 0,
+  mediaReactions: null,
+  isLoading: false,
+  selectedPolicyId: null,
+  submitCustomPolicy: async () => {},
+  selectPolicy: () => {},
+  deletePolicy: () => {},
+  resetSimulator: () => {},
+};
+
 export function useSimulator() {
   const context = useContext(SimulatorContext);
-  if (context === undefined) {
-    throw new Error("useSimulator must be used within a SimulatorProvider");
-  }
-  return context;
+  return context || defaultContextValue;
 }
