@@ -58,14 +58,14 @@ export default function ProvinceMap() {
   }, [currentProvinces]);
 
   return (
-    <div className="w-full aspect-square md:aspect-video lg:aspect-square relative flex items-center justify-center">
+    <div className="w-full h-full min-h-[400px] relative flex items-center justify-center p-4">
       <ComposableMap
         projection="geoMercator"
         projectionConfig={{
-          scale: 12000,
-          center: [4.4, 50.5] // Centered on Belgium
+          scale: 9500,
+          center: [4.5, 50.5] // Centered on Belgium
         }}
-        className="w-full h-full"
+        className="w-full h-auto max-h-[60vh] object-contain drop-shadow-md"
       >
         <Geographies geography={geoUrl}>
           {({ geographies }) =>

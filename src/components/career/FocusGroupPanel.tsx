@@ -1,17 +1,19 @@
 import React from "react";
 import { Persona } from "../../types/career";
-import { MessagesSquare } from "lucide-react";
+import { MessagesSquare, ArrowRight } from "lucide-react";
 
 interface FocusGroupPanelProps {
   personas: Persona[];
+  onNext: () => void;
 }
 
-export function FocusGroupPanel({ personas }: FocusGroupPanelProps) {
+export function FocusGroupPanel({ personas, onNext }: FocusGroupPanelProps) {
   if (!personas || personas.length === 0) return null;
 
   return (
     <div className="bg-white rounded-xl border border-black/10 premium-shadow p-6 lg:p-8">
       <div className="mb-6">
+        <span className="text-[10px] font-black uppercase tracking-widest text-slate-500 block mb-0.5">Stap 3/4</span>
         <h2 className="text-xl font-black uppercase tracking-tighter text-[#2B2B2C] flex items-center gap-2">
           <MessagesSquare className="w-5 h-5 text-purple-600" />
           Focus Group Transcripts
@@ -43,6 +45,16 @@ export function FocusGroupPanel({ personas }: FocusGroupPanelProps) {
             </div>
           );
         })}
+      </div>
+
+      <div className="border-t border-black/5 pt-4 mt-6 flex justify-end">
+        <button 
+          onClick={onNext}
+          className="bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs uppercase tracking-widest py-3 px-6 rounded transition-colors flex items-center justify-center gap-2 premium-shadow"
+        >
+          Bekijk Machtsdynamiek
+          <ArrowRight className="w-4 h-4" />
+        </button>
       </div>
     </div>
   );

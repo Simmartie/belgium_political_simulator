@@ -7,15 +7,22 @@ import { DashboardHeader } from "../../components/career/DashboardHeader";
 import { CoreMetricsPanel } from "../../components/career/CoreMetricsPanel";
 import { MonthlyActionPanel } from "../../components/career/MonthlyActionPanel";
 import { AnalysisPanel } from "../../components/career/AnalysisPanel";
+import { EconomicMetricsPanel } from "../../components/career/EconomicMetricsPanel";
 import { FocusGroupPanel } from "../../components/career/FocusGroupPanel";
-import { DynamicEventModal } from "../../components/career/DynamicEventModal";
 import { GameOverLaken } from "../../components/career/GameOverLaken";
 import { InstitutionReactionsPanel } from "../../components/career/InstitutionReactionsPanel";
+import { RegionalImpactPanel } from "../../components/career/RegionalImpactPanel";
+import { SaveManager } from "../../components/career/SaveManager";
+import { CoalitionCrisisPanel } from "../../components/career/CoalitionCrisisPanel";
 import { Play, Calendar, AlertCircle } from "lucide-react";
 
 export default function CareerPage() {
-  const { state, isLoading } = useCareer();
-  const [view, setView] = useState<"dashboard" | "briefing">("dashboard");
+  const { state, isLoading, activeSaveId } = useCareer();
+  const [view, setView] = useState<"dashboard" | "briefing" | "analysis" | "regional" | "personas" | "institutions">("dashboard");
+
+  if (!activeSaveId) {
+    return <SaveManager />;
+  }
 
   const date = new Date(2025, state.currentMonth - 1);
   const monthName = date.toLocaleString('nl-BE', { month: 'long' });
@@ -31,7 +38,7 @@ export default function CareerPage() {
         {/* Main Content Area (8 Cols) */}
         <div className="lg:col-span-8 space-y-8">
           
-          {view === "dashboard" ? (
+          {view === "dashboard" && (
             <>
               {/* THIS MONTH CTA CARD */}
               <div className="bg-white rounded-xl border border-black/10 premium-shadow p-6 lg:p-8 relative overflow-hidden">
@@ -67,25 +74,11 @@ export default function CareerPage() {
                 </div>
               </div>
 
-              {/* LATEST TURN RESULTS OR ONBOARDING */}
-              {state.history.length > 0 ? (
-                <>
-                  <section>
-                    <h3 className="text-xs font-black uppercase tracking-[0.2em] text-slate-500 mb-3">
-                      Laatste Beleidsanalyse
-                    </h3>
-                    <AnalysisPanel latestTurn={state.history[0]} />
-                  </section>
+              {/* ECONOMY KPIs */}
+              <EconomicMetricsPanel />
 
-                  <section>
-                    <h3 className="text-xs font-black uppercase tracking-[0.2em] text-slate-500 mb-3">
-                      Focusgroep Transcripts
-                    </h3>
-                    <FocusGroupPanel personas={state.history[0].result?.personas || []} />
-                  </section>
-                </>
-              ) : (
-                <div className="bg-white/60 rounded-xl border border-black/5 p-6 text-center">
+              {state.history.length === 0 && (
+                <div className="bg-white/60 rounded-xl border border-black/5 p-6 text-center mt-8">
                   <AlertCircle className="w-8 h-8 text-amber-500 mx-auto mb-2" />
                   <h4 className="font-bold text-slate-800 text-sm">Start van de Legislaatuur</h4>
                   <p className="text-xs text-slate-500 mt-1">
@@ -94,12 +87,29 @@ export default function CareerPage() {
                 </div>
               )}
             </>
-          ) : (
-            /* BRIEFING VIEW */
+          )}
+
+          {view === "briefing" && (
             <MonthlyActionPanel 
               onBack={() => setView("dashboard")}
-              onSubmitted={() => setView("dashboard")}
+              onSubmitted={() => setView("analysis")}
             />
+          )}
+
+          {view === "analysis" && state.history.length > 0 && (
+            <AnalysisPanel latestTurn={state.history[0]} onNext={() => setView("regional")} />
+          )}
+
+          {view === "regional" && state.history.length > 0 && (
+            <RegionalImpactPanel latestTurn={state.history[0]} onNext={() => setView("personas")} />
+          )}
+
+          {view === "personas" && state.history.length > 0 && (
+            <FocusGroupPanel personas={state.history[0].result?.personas || []} onNext={() => setView("institutions")} />
+          )}
+
+          {view === "institutions" && state.history.length > 0 && state.history[0].result?.institutions && (
+             <InstitutionReactionsPanel institutions={state.history[0].result.institutions} onNext={() => setView("dashboard")} />
           )}
 
         </div>
@@ -107,15 +117,11 @@ export default function CareerPage() {
         {/* Sidebar / Core Metrics (4 Cols) */}
         <div className="lg:col-span-4 space-y-8">
           <CoreMetricsPanel />
-          
-          {state.history.length > 0 && state.history[0].result?.institutions && (
-             <InstitutionReactionsPanel institutions={state.history[0].result.institutions} />
-          )}
         </div>
       </div>
 
-      {state.activeEvent && !state.isGameOver && <DynamicEventModal />}
       {state.isGameOver && <GameOverLaken />}
+      {state.isCoalitionCrisis && <CoalitionCrisisPanel />}
       
       {isLoading && (
         <div className="fixed inset-0 bg-slate-900/50 flex items-center justify-center z-50 backdrop-blur-sm">

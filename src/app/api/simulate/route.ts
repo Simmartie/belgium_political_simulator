@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import Groq from "groq-sdk";
 
 export async function POST(request: Request) {
   try {
@@ -46,11 +46,11 @@ export async function POST(request: Request) {
       });
     }
 
-    const apiKey = process.env.GEMINI_API_KEY;
+    const apiKey = process.env.GROQ_API_KEY;
 
     if (!apiKey) {
       return NextResponse.json(
-        { error: "API key is missing in .env.local. Please add GEMINI_API_KEY and restart the server." },
+        { error: "API key is missing in .env.local. Please add GROQ_API_KEY and restart the server." },
         { status: 500 }
       );
     }
@@ -106,29 +106,17 @@ Here is the actual INPUT:
   }
 }`;
 
-    const genAI = new GoogleGenerativeAI(apiKey);
-    let result;
-    let usedModel = "gemini-2.5-flash";
+    const groq = new Groq({ apiKey });
 
-    try {
-      // Primary attempt with gemini-2.5-flash
-      const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
-      result = await model.generateContent(prompt);
-    } catch (error: any) {
-      console.warn("Gemini 2.5-flash failed, switching to 3-flash...", error.message || error);
-      try {
-        // Fallback attempt with gemini-3-flash-preview
-        usedModel = "gemini-3-flash-preview";
-        const modelFallback = genAI.getGenerativeModel({ model: "gemini-3-flash-preview" });
-        result = await modelFallback.generateContent(prompt);
-      } catch (fallbackError: any) {
-        throw new Error(`Both Gemini 2.5 and 3-flash-preview failed. Last error: ${fallbackError.message}`);
-      }
-    }
+    const chatCompletion = await groq.chat.completions.create({
+      messages: [{ role: "user", content: prompt }],
+      model: "llama-3.3-70b-versatile",
+      response_format: { type: "json_object" }
+    });
 
-    console.log(`Simulation successful using model: ${usedModel}`);
+    console.log(`Simulation successful using Groq llama-3.3-70b-versatile`);
 
-    let responseText = result.response.text();
+    let responseText = chatCompletion.choices[0]?.message?.content || "";
 
     // More robust JSON extraction
     const jsonMatch = responseText.match(/\{[\s\S]*\}/);
