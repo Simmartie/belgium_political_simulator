@@ -20,12 +20,12 @@ export interface ParliamentSeat {
   satisfaction?: number; // 0-100, only relevant if isCoalition is true
 }
 
-export interface Persona {
+export interface MediaHeadline {
   id: string;
-  name: string;
-  background: string;
-  score: number; // 0-100
-  quote: string;
+  outlet: string;
+  bias: string;
+  headline: string;
+  score: number; // 0-100 sentiment score (0 = extremely negative, 100 = extremely positive)
 }
 
 export interface InstitutionReactions {
@@ -78,7 +78,7 @@ export interface CareerTurnResult {
     quote: string;
     stance: "positive" | "neutral" | "negative";
   }[];
-  personas: Persona[];
+  media_headlines: MediaHeadline[];
   institutions: InstitutionReactions;
   map_impact: Record<string, number>;
   next_event?: CareerEvent;
@@ -99,11 +99,17 @@ export interface CareerState {
   parliament: ParliamentSeat[];
   history: CareerTurn[];
   activeEvent: CareerEvent | null;
+  playerParty: string;
+  gameMode: "arizona" | "custom" | "vivaldi";
+  startYear: number;
+  startMonth: number;
+  maxMonths: number;
   isGameOver: boolean;
   gameOverReason: string | null;
   isCoalitionCrisis?: boolean;
   crisisReason?: string | null;
   provinces: Record<string, number>; // Current satisfaction per province (-100 to 100)
+  globalContext: string; // Background macro-economic state
 }
 
 export interface CareerSave {

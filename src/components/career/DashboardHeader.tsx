@@ -5,12 +5,15 @@ import { Clock, Calendar, LogOut } from "lucide-react";
 export function DashboardHeader() {
   const { state, unloadSave } = useCareer();
   
-  // Calculate Date (starts Jan 2025)
-  const date = new Date(2025, state.currentMonth - 1);
+  // Calculate Date
+  const startYear = state.startYear || 2025;
+  const startMonth = state.startMonth || 1;
+  const date = new Date(startYear, startMonth - 1 + state.currentMonth - 1);
   const monthName = date.toLocaleString('default', { month: 'long' });
   const year = date.getFullYear();
 
-  const monthsLeft = 48 - state.currentMonth + 1;
+  const maxMonths = state.maxMonths || 48;
+  const monthsLeft = maxMonths - state.currentMonth + 1;
 
   return (
     <div className="bg-white/80 backdrop-blur-md border-b border-black/10">
@@ -21,10 +24,10 @@ export function DashboardHeader() {
             <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-slate-500 mb-1">
               <span>Belgian Political Career Mode</span>
               <span>&bull;</span>
-              <span className="text-amber-600">Arizona Coalition</span>
+              <span className="text-amber-600">Regering ({state.parliament.filter(p => p.isCoalition).map(p => p.party).join(', ')})</span>
             </div>
             <h1 className="text-2xl lg:text-3xl font-black uppercase tracking-tighter text-[#2B2B2C]">
-              Premier Bart De Wever
+              {state.playerParty === "N-VA" ? "Premier Bart De Wever" : `Premier (${state.playerParty})`}
             </h1>
           </div>
 

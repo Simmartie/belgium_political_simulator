@@ -11,16 +11,11 @@ export function MonthlyActionPanel({ onBack, onSubmitted }: MonthlyActionPanelPr
   const { state, submitMonthlyAction, isLoading } = useCareer();
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [consultKernkabinet, setConsultKernkabinet] = useState(false);
-  const [mediaSpin, setMediaSpin] = useState(false);
-
   const handleSubmit = async () => {
     if (!title.trim() || !description.trim()) return;
-    await submitMonthlyAction(title, description, { consultKernkabinet, mediaSpin });
+    await submitMonthlyAction(title, description);
     setTitle("");
     setDescription("");
-    setConsultKernkabinet(false);
-    setMediaSpin(false);
     onSubmitted?.();
   };
 
@@ -131,23 +126,6 @@ export function MonthlyActionPanel({ onBack, onSubmitted }: MonthlyActionPanelPr
         </div>
 
         <div className={`flex flex-col sm:flex-row gap-4 pt-4 border-t ${event ? 'border-slate-200/60 mt-2' : 'border-black/5'} items-center`}>
-          <div className="flex gap-4">
-            <label className="flex items-center gap-2 cursor-pointer group">
-              <input type="checkbox" className="w-4 h-4 text-slate-900 rounded border-slate-300 focus:ring-slate-900" disabled={isLoading} checked={consultKernkabinet} onChange={(e) => setConsultKernkabinet(e.target.checked)} />
-              <span className="text-xs font-bold text-slate-600 group-hover:text-slate-900 flex items-center gap-1.5 uppercase tracking-wider">
-                <Users className="w-3.5 h-3.5" />
-                Consult Kernkabinet
-              </span>
-            </label>
-            
-            <label className="flex items-center gap-2 cursor-pointer group">
-              <input type="checkbox" className="w-4 h-4 text-slate-900 rounded border-slate-300 focus:ring-slate-900" disabled={isLoading} checked={mediaSpin} onChange={(e) => setMediaSpin(e.target.checked)} />
-              <span className="text-xs font-bold text-slate-600 group-hover:text-slate-900 flex items-center gap-1.5 uppercase tracking-wider">
-                <Megaphone className="w-3.5 h-3.5" />
-                Media Spin
-              </span>
-            </label>
-          </div>
 
           <button 
             className={`w-full sm:w-auto sm:ml-auto text-white font-black text-xs uppercase tracking-widest py-3 px-6 rounded transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed premium-shadow ${theme.buttonBg}`}

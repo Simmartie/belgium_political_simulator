@@ -36,11 +36,11 @@ export async function POST(request: Request) {
         "opposition_reaction": [
           { "party": "PS", "quote": "DEBUG: Dit is onaanvaardbaar.", "stance": "negative" }
         ],
-        "personas": [
-          { "id": "jan", "name": "Jan", "background": "Havenarbeider uit Antwerpen, Vlaams-nationalist", "score": 65, "quote": "DEBUG: Goed voor Vlaanderen!" },
-          { "id": "lucie", "name": "Lucie", "background": "Vakbondslid uit Luik, socialist", "score": 20, "quote": "DEBUG: Dit is een aanval op de werkende klasse." },
-          { "id": "guillaume", "name": "Guillaume", "background": "Ondernemer uit Ukkel, rechts-liberaal", "score": 80, "quote": "DEBUG: Goed voor de economie, we moeten doorzetten." },
-          { "id": "sofie", "name": "Sofie", "background": "Klimaatactiviste uit Gent, progressief", "score": 40, "quote": "DEBUG: Economie boven ecologie? Teleurstellend." }
+        "media_headlines": [
+          { "id": "hln", "outlet": "Het Laatste Nieuws (HLN)", "bias": "Mainstream Vlaams", "score": 65, "headline": "DEBUG: Goed voor Vlaanderen!" },
+          { "id": "lesoir", "outlet": "Le Soir", "bias": "Mainstream Franstalig", "score": 20, "headline": "DEBUG: Dit is een aanval op de werkende klasse." },
+          { "id": "tijd", "outlet": "De Tijd", "bias": "Financieel-economisch", "score": 80, "headline": "DEBUG: Goed voor de economie, we moeten doorzetten." },
+          { "id": "morgen", "outlet": "De Morgen", "bias": "Progressief Vlaams", "score": 40, "headline": "DEBUG: Economie boven ecologie? Teleurstellend." }
         ],
         "institutions": {
           "unions": -30,
@@ -74,17 +74,41 @@ export async function POST(request: Request) {
       );
     }
 
+    const enactedPolicies = state.history && state.history.length > 0 
+      ? state.history.map((turn: any) => `- Month ${turn.month}: ${turn.actionTitle} (${turn.actionDescription})`).join('\\n')
+      : "None yet.";
+
+    const startYear = state.startYear || 2025;
+    const startMonth = state.startMonth || 1;
+    const maxMonths = state.maxMonths || 48;
+    const date = new Date(startYear, startMonth - 1 + state.currentMonth - 1);
+    const monthName = date.toLocaleString('en-US', { month: 'long' });
+    const currentYear = date.getFullYear();
+
+    let historicalContext = "";
+    if (state.gameMode === "vivaldi") {
+      if (currentYear === 2020 || currentYear === 2021) {
+        historicalContext = `\\nHISTORICAL CONTEXT: The year is ${currentYear}. The dominant global crisis is the COVID-19 pandemic. Hospitals are struggling, and lockdowns or restrictions are a constant political debate. You must generate events relating to this.`;
+      } else if (currentYear === 2022) {
+        historicalContext = `\\nHISTORICAL CONTEXT: The year is ${currentYear}. The dominant global crisis is the Russian invasion of Ukraine, leading to a massive European energy crisis and inflation. You must generate events relating to this.`;
+      } else if (currentYear >= 2023) {
+        const budgetWarning = state.economy.budgetDeficit > 4.0 ? " and severe budget deficits" : "";
+        historicalContext = `\\nHISTORICAL CONTEXT: The year is ${currentYear}. The Gaza conflict${budgetWarning} dominate the political landscape. You must generate events relating to this.`;
+      }
+    }
+
     const prompt = `You are the core simulation engine of a Belgian Political Simulator: Career Mode. 
-The player is Prime Minister Bart De Wever (N-VA), leading the 'Arizona' coalition (N-VA, MR, Les Engagés, Vooruit, CD&V).
-The current month is ${state.currentMonth} out of 48 (Starting Jan 2025).
+The player is the Prime Minister from the ${state.playerParty || "N-VA"} party.
+They are leading a coalition consisting of: ${state.parliament.filter((p: any) => p.isCoalition).map((p: any) => p.party).join(', ')}.
+The current date is ${monthName} ${currentYear} (Month ${state.currentMonth} out of ${maxMonths}).${historicalContext}
 
 Current Metrics:
 - Popularity: ${state.metrics.popularity}%
 - Coalition Stability: ${state.metrics.coalitionStability}%
-- Internal N-VA Stability: ${state.metrics.internalStability}%
+- Internal Party Stability: ${state.metrics.internalStability}%
 
 Current Coalition Partners & Satisfaction (0-100):
-${state.parliament.filter((p: any) => p.isCoalition).map((p: any) => `- ${p.party}: ${p.satisfaction}%`).join('\n')}
+${state.parliament.filter((p: any) => p.isCoalition).map((p: any) => `- ${p.party}: ${p.satisfaction}%`).join('\\n')}
 
 Current Economy:
 - Budget Deficit: ${state.economy.budgetDeficit}% of GDP
@@ -93,26 +117,37 @@ Current Economy:
 - Purchasing Power Index: ${state.economy.purchasingPower}
 - Climate Goals Progress: ${state.economy.climateGoals}%
 
+Global Macro-Economic Context: ${state.globalContext}
+
+Enacted Policies (Active Laws from Previous Months):
+${enactedPolicies}
+
 ${action.event
-  ? `The player is responding to a crisis event: "${action.event.title}" (${action.event.description}).\nTheir policy response is:\nTitle: "${action.title}"\nDescription: "${action.description}"`
-  : `The player is implementing a new policy:\nTitle: "${action.title}"\nDescription: "${action.description}"`
+  ? `The player is responding to a crisis event: "${action.event.title}"\\nEvent Background Context: "${action.event.context}"\\nEvent Description: "${action.event.description}"\\n\\nTheir policy response is:\\nTitle: "${action.title}"\\nDescription: "${action.description}"`
+  : `The player is implementing a new policy:\\nTitle: "${action.title}"\\nDescription: "${action.description}"`
 }
-
-Options applied by the player:
-- Consult Kernkabinet: ${action.options?.consultKernkabinet ? "YES (Player consulted with coalition partners before announcing this, meaning coalition stability should generally be positively affected or less negatively impacted)." : "NO (The player acted unilaterally, which might upset coalition partners)."}
-- Media Spin: ${action.options?.mediaSpin ? "YES (Player launched a major PR campaign for this, meaning popularity should generally receive a boost or take less of a hit)." : "NO"}
-
 [YOUR TASK]
 Calculate the political impact of this action and generate a JSON response. 
 
 [RULES]
-1. Reflect current Belgian politics (e.g. Vooruit is center-left but pragmatic, MR is right-liberal, N-VA is Flemish nationalist & conservative).
-2. "Coalition Stability" drops when the player pushes hard-right/Vlaams-nationalist policies without consulting left-wing partners (Vooruit) or centrist partners (CD&V/Les Engagés).
-3. Generate realistic reactions for 4 specific personas:
-   - "Jan": Antwerp dockworker, Flemish-nationalist (0-100 score + quote).
-   - "Lucie": Liege union member, socialist (0-100 score + quote).
-   - "Guillaume": Uccle entrepreneur, right-liberal (0-100 score + quote).
-   - "Sofie": Ghent climate activist, progressive (0-100 score + quote).
+1. Reflect strict Belgian party ideologies and RED LINES:
+   - N-VA: Flemish nationalist, conservative on culture/ethics, economically right. RED LINE: Re-federalizing powers back to the federal level.
+   - Vooruit: Center-left, VERY progressive on ethical issues (LGBTQ+, abortion). RED LINE: Abolishing indexation of wages.
+   - MR & Open Vld: Right-liberal, pro-business. RED LINE: Introducing a massive new wealth tax.
+   - CD&V & Les Engagés: Centrist, Christian-democrat. RED LINE: Abolishing child benefits.
+   - PS: Left-wing, strong on social security/unions. RED LINE: Slashing pensions or unemployment benefits.
+   - Groen/Ecolo: Left-wing, climate-focused. RED LINE: Opening new nuclear plants without investments in renewables.
+   - Vlaams Belang: Far-right, highly conservative.
+   - PVDA/PTB: Radical left, pro-worker.
+   CRITICAL VETO RULE: If the player enacts a policy that crosses a coalition partner's RED LINE, you MUST drop their satisfaction to 0 and spawn a 'critical' next_event where they threaten to collapse the government immediately. Progressive parties (Vooruit, Groen, PS, PTB, MR, Open Vld) MUST react positively to progressive ethical policies, regardless of who proposes them.
+2. "Coalition Stability" drops when the player pushes policies that directly contradict the core ideologies of their coalition partners.
+3. MEDIA FRAMING (Newspapers):
+   - Generate realistic headlines from 4 specific media outlets to reflect how the policy is framed in the press. Do NOT use personas.
+     * "Het Laatste Nieuws (HLN)": Mainstream, popular Flemish newspaper (0-100 sentiment score + headline).
+     * "De Tijd": Financial/Business-focused Flemish newspaper (0-100 sentiment score + headline).
+     * "De Morgen": Progressive, left-leaning Flemish newspaper (0-100 sentiment score + headline).
+     * "Le Soir": Mainstream Francophone newspaper (0-100 sentiment score + headline).
+   CRITICAL FOR MEDIA: Make the headlines sound like authentic, punchy newspaper titles. Don't force topics (like climate or finance) if the policy is about something else. Reflect their specific editorial bias naturally.
 4. EVALUATION & PUNISHMENT FOR CRISIS RESPONSES:
    - If the player gives a BAD, weak, dismissive, or contradictory response to a crisis (e.g., ignoring a partner party's core demand or making arrogant statements):
      * Heavily punish their metrics: drop Coalition Stability (-15 to -30), Popularity (-10 to -20), or Institutional approval.
@@ -125,19 +160,32 @@ Calculate the political impact of this action and generate a JSON response.
    - You MUST generate at least one reaction from the opposition (e.g. PS, PTB, Vlaams Belang, Groen). Provide their party name, a sharp quote (Dutch or French), and their stance.
 6. COALITION PARTNER SATISFACTION:
    - You MUST calculate a 'party_satisfaction_impact' (e.g. -15 or +10) for each coalition partner based on how much they like the policy.
-   - If a partner's satisfaction drops very low (< 30) or you completely ignore their core demands, you MUST generate a crisis 'next_event' where they threaten to leave the government.
+   - If a partner's satisfaction drops very low (< 30) or you completely ignore their core demands, you MUST generate a crisis 'next_event' where they threaten to leave the government. CRITICAL: In the event description, you MUST explicitly state their CONCRETE and ACTIONABLE demand (e.g., "They demand an extra €500M for healthcare" or "They demand the immediate cancellation of the tax cut"). The player needs to know exactly what policy they must enact to save the coalition.
    - If a partner is critically angry and the player's current action is a bad response to their threat, they WILL leave the government. In that case, add them to 'coalition_changes' with action 'left'.
 7. FREQUENCY & GENERATION OF EVENTS:
    - If currentMonth is 1, 'next_event' MUST BE null. The first month is always event-free.
-   - For all other months, standard monthly actions should spawn a 'next_event' ~80% of the time.
-   - You MUST spawn a crisis event if the economy performs poorly (e.g. budgetDeficit > 5.5%, inflation > 5.0%, or purchasingPower < 95.0).
+   - DYNAMIC EVENT GENERATION: Assess the situation realistically to decide if 'next_event' should be an event or null:
+     * PACING: You MUST frequently leave 'next_event' as null (about 40-50% of the time) to give the player "free months" where they can proactively enact their own legislation instead of just reacting to crises. Do not trap them in endless events unless it's a severe ongoing crisis.
+     * EXOGENOUS SHOCKS: To keep the game realistic, occasionally generate completely unexpected, random external events that the player has no control over. Examples of themes (create your own!): natural disasters (floods, droughts), geopolitical crises (NATO requests, sudden wars), global economic shocks, or unexpected domestic tragedies.
+     * CAUSAL EVENTS: If there is an unresolved severe crisis from a previous turn, if the player enacts a highly controversial measure, or if the economy performs poorly, you MUST spawn a crisis event related to that.
    - Events MUST include a 'severity' level ('low', 'medium', 'high', 'critical').
    - If the player's response to an event is "ignore" or "do nothing": 'low'/'medium' crises might resolve themselves, but 'high'/'critical' crises will escalate severely.
-   - Events should be realistic "Situation Reports" (e.g., strikes, court rulings, international crises, EU demands) or direct consequences of the player's previous actions (e.g., if they cut pensions, spawn a union strike event).
+   - Events should be realistic "Situation Reports" or direct consequences of the player's previous actions. CRITICAL: When generating an event, you MUST use the 'context' field to explicitly state WHY this event is happening, especially if it is a consequence of the player's action (e.g. "Because the player embedded abortion in the constitution last turn, conservative groups are protesting"). This 'context' will be fed back to you next turn so you remember the exact cause.
    - Do NOT generate repetitive or identical crisis events turn after turn.
+8. LOGICAL CONSISTENCY (CHAIN OF THOUGHT):
+   - You MUST fill out the 'reasoning_scratchpad' field FIRST. Use this field to explicitly evaluate how the policy aligns with the predefined ideologies of each party before assigning any scores or generating quotes.
+   - CRITICAL: Read the player's action carefully! Do NOT hallucinate policy mechanisms. If the player says "Invest in X", it costs budget but does NOT raise taxes. If the player says "Tax Y", it raises taxes. Do not assume "climate policy" automatically equals "energy price hikes" unless the player specifically introduced a tax. Evaluate exactly what the player wrote.
+   - Your final numbers and quotes MUST strictly follow the logic established in your scratchpad. A left-wing policy must consistently get left-wing support; a right-wing policy must consistently get right-wing support. Do not contradict yourself or assign random reactions.
+9. LONG-TERM COMPOUNDING EFFECTS:
+   - The player has enacted several policies in previous months (see "Enacted Policies").
+   - You MUST consider the continuous, long-term effects of these active laws on the current economy and popularity. For example, if a previous policy was "Raise interest rates", it should continue to lower inflation this month. If they "Subsidize green energy", it should continue to improve climate goals but cost budget.
+   - Dynamically deduce these ongoing effects and factor them into your final \`economy_impact\` and \`metrics_impact\` numbers for THIS turn. Do not wait for me to hardcode them.
+10. MACRO-ECONOMIC CONTEXT:
+    - You MUST judge the player's economic policies against the backdrop of the 'Global Macro-Economic Context'. For example, tax cuts during a "Tech Boom" work well, but during a "European Economic Recession" they will cause a massive deficit spike.
 
 Return ONLY a strict JSON object:
 {
+  "reasoning_scratchpad": "<Step-by-step logic detailing how this policy strictly aligns or conflicts with the core ideologies of N-VA, Vooruit, MR, CD&V, PS, Groen, and Vlaams Belang. Evaluate this FIRST.>",
   "metrics_impact": {
     "popularity": <number between -20 and 20>,
     "coalition": <number between -30 and 20>,
@@ -164,11 +212,11 @@ Return ONLY a strict JSON object:
   "opposition_reaction": [
     { "party": "<Party Name>", "quote": "<Quote>", "stance": "<positive|neutral|negative>" }
   ],
-  "personas": [
-    { "id": "jan", "name": "Jan", "background": "Havenarbeider, Vlaams-nationalist", "score": <0-100>, "quote": "<Dutch quote>" },
-    { "id": "lucie", "name": "Lucie", "background": "Vakbondslid, socialist", "score": <0-100>, "quote": "<French/Dutch quote>" },
-    { "id": "guillaume", "name": "Guillaume", "background": "Ondernemer, rechts-liberaal", "score": <0-100>, "quote": "<French quote>" },
-    { "id": "sofie", "name": "Sofie", "background": "Klimaatactiviste, progressief", "score": <0-100>, "quote": "<Dutch quote>" }
+  "media_headlines": [
+    { "id": "hln", "outlet": "Het Laatste Nieuws (HLN)", "bias": "Mainstream Vlaams", "score": <0-100>, "headline": "<Dutch headline>" },
+    { "id": "tijd", "outlet": "De Tijd", "bias": "Financieel-economisch", "score": <0-100>, "headline": "<Dutch headline>" },
+    { "id": "morgen", "outlet": "De Morgen", "bias": "Progressief Vlaams", "score": <0-100>, "headline": "<Dutch headline>" },
+    { "id": "lesoir", "outlet": "Le Soir", "bias": "Mainstream Franstalig", "score": <0-100>, "headline": "<French headline>" }
   ],
   "institutions": {
     "unions": <-100 to 100>,
@@ -186,11 +234,26 @@ Return ONLY a strict JSON object:
 
     const groq = new Groq({ apiKey });
     
-    const chatCompletion = await groq.chat.completions.create({
-      messages: [{ role: "user", content: prompt }],
-      model: "llama-3.3-70b-versatile",
-      response_format: { type: "json_object" }
-    });
+    let chatCompletion;
+    try {
+      chatCompletion = await groq.chat.completions.create({
+        messages: [{ role: "user", content: prompt }],
+        model: "llama-3.3-70b-versatile",
+        response_format: { type: "json_object" }
+      });
+    } catch (apiError: any) {
+      if (apiError.status === 429 || apiError.message?.includes("Rate limit")) {
+        // Fallback to another model if rate limited
+        console.warn("Rate limit reached for llama-3.3-70b-versatile, falling back to llama-3.1-8b-instant");
+        chatCompletion = await groq.chat.completions.create({
+          messages: [{ role: "user", content: prompt }],
+          model: "llama-3.1-8b-instant",
+          response_format: { type: "json_object" }
+        });
+      } else {
+        throw apiError;
+      }
+    }
 
     const responseText = chatCompletion.choices[0]?.message?.content || "";
     const jsonMatch = responseText.match(/\{[\s\S]*\}/);

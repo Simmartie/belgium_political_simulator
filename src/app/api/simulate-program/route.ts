@@ -60,9 +60,24 @@ Evaluate the combined effect of all policies in the program.
 [CONTEMPORARY POLITICAL CONTEXT]
 Based on the full program, estimate the percentage of votes this program could secure in each province (0-100%).
 Also, estimate how much this program matches the ideology of existing Belgian political parties (0-100%).
+Reflect strict Belgian party ideologies:
+- N-VA: Flemish nationalist, conservative on culture/ethics, economically right.
+- Vooruit: Center-left, VERY progressive on ethical issues (LGBTQ+, abortion). They ALWAYS support progressive ethical policies.
+- MR & Open Vld: Right-liberal, pro-business, but ethically progressive/secular.
+- CD&V & Les Engagés: Centrist, Christian-democrat, moderate on ethics. CD&V has strong union ties.
+- PS: Left-wing, strong on social security/unions, ethically progressive.
+- Groen/Ecolo: Left-wing, climate-focused, VERY progressive on ethical issues.
+- Vlaams Belang: Far-right, highly conservative, anti-immigration.
+- PVDA/PTB: Radical left, pro-worker, ethically progressive.
+CRITICAL: Progressive parties (Vooruit, Groen, PS, PTB, MR, Open Vld) MUST react positively to progressive ethical policies (like abortion or LGBTQ+ rights).
+
+LOGICAL CONSISTENCY (CHAIN OF THOUGHT):
+- You MUST fill out the 'reasoning_scratchpad' field FIRST. Use this field to explicitly evaluate how the program aligns with the predefined ideologies of each party.
+- Your final numbers MUST strictly follow the logic established in your scratchpad. A left-wing program must consistently get left-wing support; a right-wing program must consistently get right-wing support. Do not contradict yourself.
 
 Calculate the impact and return ONLY a strict RAW JSON object in this format with no markdown code blocks:
 {
+  "reasoning_scratchpad": "<Step-by-step logic detailing how this program strictly aligns or conflicts with the core ideologies of N-VA, Vooruit, MR, CD&V, PS, Groen, and Vlaams Belang. Evaluate this FIRST.>",
   "metric_shifts": {
     "budget_deficit": 0.5,
     "gdp_total": 2.5,

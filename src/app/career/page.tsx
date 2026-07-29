@@ -8,7 +8,7 @@ import { CoreMetricsPanel } from "../../components/career/CoreMetricsPanel";
 import { MonthlyActionPanel } from "../../components/career/MonthlyActionPanel";
 import { AnalysisPanel } from "../../components/career/AnalysisPanel";
 import { EconomicMetricsPanel } from "../../components/career/EconomicMetricsPanel";
-import { FocusGroupPanel } from "../../components/career/FocusGroupPanel";
+import { MediaHeadlinesPanel } from "../../components/career/MediaHeadlinesPanel";
 import { GameOverLaken } from "../../components/career/GameOverLaken";
 import { InstitutionReactionsPanel } from "../../components/career/InstitutionReactionsPanel";
 import { RegionalImpactPanel } from "../../components/career/RegionalImpactPanel";
@@ -24,7 +24,9 @@ export default function CareerPage() {
     return <SaveManager />;
   }
 
-  const date = new Date(2025, state.currentMonth - 1);
+  const startYear = state.startYear || 2025;
+  const startMonth = state.startMonth || 1;
+  const date = new Date(startYear, startMonth - 1 + state.currentMonth - 1);
   const monthName = date.toLocaleString('nl-BE', { month: 'long' });
   const year = date.getFullYear();
 
@@ -105,7 +107,7 @@ export default function CareerPage() {
           )}
 
           {view === "personas" && state.history.length > 0 && (
-            <FocusGroupPanel personas={state.history[0].result?.personas || []} onNext={() => setView("institutions")} />
+            <MediaHeadlinesPanel headlines={state.history[0].result?.media_headlines || []} onNext={() => setView("institutions")} />
           )}
 
           {view === "institutions" && state.history.length > 0 && state.history[0].result?.institutions && (

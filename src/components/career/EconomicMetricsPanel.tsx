@@ -66,6 +66,10 @@ export function EconomicMetricsPanel() {
         borderClass="bg-slate-900" 
         barWidth={climateGoals}
       />
+      <div className="bg-slate-900 rounded-xl border border-black/20 p-5 premium-shadow relative overflow-hidden flex flex-col justify-center">
+        <h3 className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">Globale Context</h3>
+        <p className="text-lg font-black tracking-tighter text-white uppercase">{state.globalContext}</p>
+      </div>
     </div>
   );
 }

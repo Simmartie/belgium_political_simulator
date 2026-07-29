@@ -46,6 +46,21 @@ const initialParliament: ParliamentSeat[] = [
   { party: "DéFI", seats: 1, color: "#DF0045", isCoalition: false },
 ];
 
+const vivaldiParliament: ParliamentSeat[] = [
+  { party: "N-VA", seats: 25, color: "#F0B400", isCoalition: false },
+  { party: "PS", seats: 20, color: "#FF0000", isCoalition: true, satisfaction: 70 },
+  { party: "Vlaams Belang", seats: 18, color: "#FFE600", isCoalition: false },
+  { party: "MR", seats: 14, color: "#0047AB", isCoalition: true, satisfaction: 70 },
+  { party: "Ecolo", seats: 13, color: "#99CC33", isCoalition: true, satisfaction: 65 },
+  { party: "CD&V", seats: 12, color: "#FF7F00", isCoalition: true, satisfaction: 70 },
+  { party: "Open Vld", seats: 12, color: "#0066CC", isCoalition: true, satisfaction: 75 },
+  { party: "PTB/PVDA", seats: 12, color: "#D20000", isCoalition: false },
+  { party: "SP.A (Vooruit)", seats: 9, color: "#E00034", isCoalition: true, satisfaction: 70 },
+  { party: "Groen", seats: 8, color: "#009900", isCoalition: true, satisfaction: 65 },
+  { party: "cdH (Les Engagés)", seats: 5, color: "#00A896", isCoalition: false },
+  { party: "DéFI", seats: 2, color: "#DF0045", isCoalition: false },
+];
+
 const initialState: CareerState = {
   currentMonth: 1, // Jan 2025
   metrics: initialMetrics,
@@ -58,19 +73,25 @@ const initialState: CareerState = {
   isCoalitionCrisis: false,
   crisisReason: null,
   provinces: { ...initialProvinces },
+  globalContext: "Stable European Markets",
+  playerParty: "N-VA",
+  gameMode: "arizona",
+  startYear: 2025,
+  startMonth: 1,
+  maxMonths: 48,
 };
 
 interface CareerContextType {
   state: CareerState;
   isLoading: boolean;
-  submitMonthlyAction: (title: string, description: string, options?: { consultKernkabinet: boolean, mediaSpin: boolean }) => Promise<void>;
+  submitMonthlyAction: (title: string, description: string) => Promise<void>;
   resetCareer: () => void;
   resolveCrisis: (success: boolean, reason?: string, newParty?: string) => void;
   flemishSatisfaction: number;
   walloonSatisfaction: number;
   saves: CareerSave[];
   activeSaveId: string | null;
-  createNewSave: (name: string) => void;
+  createNewSave: (name: string, customParliament?: ParliamentSeat[], playerParty?: string, gameMode?: "arizona" | "custom" | "vivaldi") => void;
   loadSave: (id: string) => void;
   deleteSave: (id: string) => void;
   unloadSave: () => void;
@@ -173,8 +194,13 @@ export function CareerProvider({ children }: { children: ReactNode }) {
       const isCoalitionCrisis = totalCoalitionSeats < 76;
       const crisisReason = isCoalitionCrisis ? `De regering heeft haar meerderheid verloren (${totalCoalitionSeats}/150 zetels).` : null;
 
-      const isGameOver = newMetrics.coalitionStability < 20 && !isCoalitionCrisis;
-      const gameOverReason = isGameOver ? "Koning Filip heeft uw ontslag geëist vanwege een onwerkbare coalitiestabiliteit." : null;
+      let isGameOver = newMetrics.coalitionStability < 20 && !isCoalitionCrisis;
+      let gameOverReason = isGameOver ? "Koning Filip heeft uw ontslag geëist vanwege een onwerkbare coalitiestabiliteit." : null;
+
+      if (!isGameOver && prev.currentMonth >= prev.maxMonths) {
+        isGameOver = true;
+        gameOverReason = "De legislatuur zit erop. Het is tijd voor nieuwe verkiezingen!";
+      }
 
       // Create history entry
       const historyEntry = {
@@ -185,9 +211,24 @@ export function CareerProvider({ children }: { children: ReactNode }) {
         resolvedEvent: prev.activeEvent || undefined,
       };
 
+      // Handle Global Context rotation every 12 months (Jan 1st)
+      let newGlobalContext = prev.globalContext;
+      const nextMonth = prev.currentMonth + 1;
+      if (nextMonth % 12 === 1 && nextMonth > 1) {
+        const contexts = [
+          "Stable European Markets",
+          "European Economic Recession",
+          "Global Energy Crisis",
+          "Tech & Innovation Boom",
+          "High Global Inflation",
+          "Geopolitical Instability in Europe"
+        ];
+        newGlobalContext = contexts[Math.floor(Math.random() * contexts.length)];
+      }
+
       return {
         ...prev,
-        currentMonth: prev.currentMonth + 1,
+        currentMonth: nextMonth,
         metrics: newMetrics,
         economy: newEconomy,
         provinces: newProvinces,
@@ -198,6 +239,7 @@ export function CareerProvider({ children }: { children: ReactNode }) {
         gameOverReason,
         isCoalitionCrisis,
         crisisReason,
+        globalContext: newGlobalContext,
       };
     });
   };
@@ -239,7 +281,7 @@ export function CareerProvider({ children }: { children: ReactNode }) {
     });
   };
 
-  const submitMonthlyAction = async (title: string, description: string, options?: { consultKernkabinet: boolean, mediaSpin: boolean }) => {
+  const submitMonthlyAction = async (title: string, description: string) => {
     if (state.isGameOver || state.isCoalitionCrisis) return;
     setIsLoading(true);
     try {
@@ -252,12 +294,14 @@ export function CareerProvider({ children }: { children: ReactNode }) {
             economy: state.economy,
             currentMonth: state.currentMonth,
             parliament: state.parliament,
+            globalContext: state.globalContext,
+            playerParty: state.playerParty,
+            history: state.history,
           },
           action: {
             type: "policy",
             title,
             description,
-            options,
             event: state.activeEvent,
           },
         }),
@@ -279,20 +323,48 @@ export function CareerProvider({ children }: { children: ReactNode }) {
     setState(initialState);
   };
 
-  const createNewSave = (name: string) => {
+  const createNewSave = (name: string, customParliament?: ParliamentSeat[], playerParty?: string, gameMode: "arizona" | "custom" | "vivaldi" = "arizona") => {
     const id = Date.now().toString();
+    
+    // Set 2020 starting metrics for Vivaldi mode
+    const startingEconomy = gameMode === "vivaldi" ? {
+      budgetDeficit: 5.5, // 2020 COVID deficit was high
+      gdp: 460.0, // Lower GDP in 2020
+      inflation: 0.7, // Low inflation before energy crisis
+      purchasingPower: 100.0,
+      climateGoals: 20.0, // Lower progress in 2020
+    } : initialEconomyMetrics;
+
+    const startingMetrics = gameMode === "vivaldi" ? {
+      popularity: 60, // De Croo started relatively popular
+      coalitionStability: 85, // Vivaldi started with high hopes
+      internalStability: 90,
+    } : initialMetrics;
+
+    const newState: CareerState = {
+      ...initialState,
+      parliament: customParliament || (gameMode === "vivaldi" ? vivaldiParliament : initialParliament),
+      playerParty: playerParty || (gameMode === "vivaldi" ? "Open Vld" : "N-VA"),
+      economy: startingEconomy,
+      metrics: startingMetrics,
+      gameMode,
+      startYear: gameMode === "vivaldi" ? 2020 : 2025,
+      startMonth: gameMode === "vivaldi" ? 10 : 1,
+      maxMonths: gameMode === "vivaldi" ? 44 : 48,
+    };
+
     const newSave: CareerSave = {
       id,
       name,
       updatedAt: Date.now(),
-      state: initialState,
+      state: newState,
     };
     setSaves(prev => {
       const updated = [newSave, ...prev];
       localStorage.setItem("careerSaves", JSON.stringify(updated));
       return updated;
     });
-    setState(initialState);
+    setState(newState);
     setActiveSaveId(id);
   };
 
