@@ -157,26 +157,26 @@ export default function CareerPage() {
                         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                           <div className="bg-white border border-black/5 rounded p-3 text-center">
                             <div className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Begroting</div>
-                            <div className={`text-sm font-black ${turn.result.analysis?.budgetImpact?.includes('+') ? 'text-emerald-600' : turn.result.analysis?.budgetImpact?.includes('-') ? 'text-rose-600' : 'text-slate-600'}`}>
-                              {turn.result.analysis?.budgetImpact || "N/A"}
+                            <div className={`text-sm font-black ${turn.result?.analysis?.budgetImpact?.includes('+') ? 'text-emerald-600' : turn.result?.analysis?.budgetImpact?.includes('-') ? 'text-rose-600' : 'text-slate-600'}`}>
+                              {turn.result?.analysis?.budgetImpact || "N/A"}
                             </div>
                           </div>
                           <div className="bg-white border border-black/5 rounded p-3 text-center">
                             <div className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Populariteit</div>
-                            <div className={`text-sm font-black ${turn.result.metrics_impact.popularity > 0 ? 'text-emerald-600' : turn.result.metrics_impact.popularity < 0 ? 'text-rose-600' : 'text-slate-600'}`}>
-                              {turn.result.metrics_impact.popularity > 0 ? "+" : ""}{turn.result.metrics_impact.popularity}%
+                            <div className={`text-sm font-black ${(turn.result?.metrics_impact?.popularity || 0) > 0 ? 'text-emerald-600' : (turn.result?.metrics_impact?.popularity || 0) < 0 ? 'text-rose-600' : 'text-slate-600'}`}>
+                              {(turn.result?.metrics_impact?.popularity || 0) > 0 ? "+" : ""}{turn.result?.metrics_impact?.popularity || 0}%
                             </div>
                           </div>
                           <div className="bg-white border border-black/5 rounded p-3 text-center">
                             <div className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Stabiliteit</div>
-                            <div className={`text-sm font-black ${turn.result.metrics_impact.coalition > 0 ? 'text-emerald-600' : turn.result.metrics_impact.coalition < 0 ? 'text-rose-600' : 'text-slate-600'}`}>
-                              {turn.result.metrics_impact.coalition > 0 ? "+" : ""}{turn.result.metrics_impact.coalition}%
+                            <div className={`text-sm font-black ${(turn.result?.metrics_impact?.coalition || 0) > 0 ? 'text-emerald-600' : (turn.result?.metrics_impact?.coalition || 0) < 0 ? 'text-rose-600' : 'text-slate-600'}`}>
+                              {(turn.result?.metrics_impact?.coalition || 0) > 0 ? "+" : ""}{turn.result?.metrics_impact?.coalition || 0}%
                             </div>
                           </div>
                           <div className="bg-white border border-black/5 rounded p-3 text-center">
                             <div className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Complexiteit</div>
-                            <div className="text-sm font-black text-slate-700 truncate px-1" title={turn.result.analysis?.complexity}>
-                              {turn.result.analysis?.complexity || "Low"}
+                            <div className="text-sm font-black text-slate-700 truncate px-1" title={turn.result?.analysis?.complexity}>
+                              {turn.result?.analysis?.complexity || "Low"}
                             </div>
                           </div>
                         </div>

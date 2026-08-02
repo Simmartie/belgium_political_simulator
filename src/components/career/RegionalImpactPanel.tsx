@@ -81,7 +81,6 @@ export function RegionalImpactPanel({ latestTurn, onNext }: RegionalImpactPanelP
                   if (!isProvince && !isBrussels) return null;
 
                   const provinceKey = mapProvinceKey(geo.properties.name_nl, geo.properties.reg_nis);
-                  // @ts-expect-error missing index signature on map_impact
                   const value = map_impact ? (map_impact[provinceKey] || 0) : 0;
                   const fill = getColor(value, dynamicScale);
 
