@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import Groq from "groq-sdk";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 
 export async function POST(request: Request) {
   try {
@@ -43,11 +44,14 @@ export async function POST(request: Request) {
       });
     }
 
-    const apiKey = process.env.GROQ_API_KEY;
+    const groqApiKey = process.env.GROQ_API_KEY;
+    const geminiApiKey = process.env.GEMINI_API_KEY;
+    const geminiApiKey2 = process.env.GEMINI_API_KEY2;
+    const geminiApiKey3 = process.env.GEMINI_API_KEY3;
 
-    if (!apiKey) {
+    if (!groqApiKey && !geminiApiKey) {
       return NextResponse.json(
-        { error: "API key is missing in .env.local. Please add GROQ_API_KEY and restart the server." },
+        { error: "API keys are missing in .env.local. Please add GEMINI_API_KEY or GROQ_API_KEY and restart the server." },
         { status: 500 }
       );
     }
@@ -113,23 +117,135 @@ Here is the actual INPUT:
   "program": ${JSON.stringify(policies)}
 }`;
 
-    const groq = new Groq({ apiKey });
+    let responseText = "";
+    let switchMessage = null;
 
-    const chatCompletion = await groq.chat.completions.create({
-      messages: [{ role: "user", content: prompt }],
-      model: "llama-3.3-70b-versatile",
-      response_format: { type: "json_object" }
-    });
+    try {
+      if (!geminiApiKey && !geminiApiKey2 && !geminiApiKey3) {
+         throw new Error("No Gemini API keys available");
+      }
+      
+      const apiKeys = [
+        { key: geminiApiKey, name: "GEMINI_API_KEY 1" },
+        { key: geminiApiKey2, name: "GEMINI_API_KEY 2" },
+        { key: geminiApiKey3, name: "GEMINI_API_KEY 3" }
+      ].filter(k => k.key);
 
-    console.log(`Program Simulation successful using Groq llama-3.3-70b-versatile`);
+      const primaryModels = [
+        "gemini-3.6-flash",
+        "gemini-3.5-flash",
+        "gemini-3.0-flash"
+      ];
+      
+      const secondaryModels = [
+        "gemini-3.5-flash-lite",
+        "gemini-2.5-flash",
+        "gemini-3.1-lite"
+      ];
 
-    let responseText = chatCompletion.choices[0]?.message?.content || "";
+      let geminiSuccess = false;
+
+      // Phase 1: Try primary models across all available keys sequentially
+      for (let i = 0; i < apiKeys.length; i++) {
+        const apiKeyObj = apiKeys[i];
+        const genAI = new GoogleGenerativeAI(apiKeyObj.key!);
+        
+        for (const modelName of primaryModels) {
+          try {
+            const model = genAI.getGenerativeModel({ 
+              model: modelName,
+              generationConfig: { responseMimeType: "application/json" }
+            });
+            
+            const result = await model.generateContent(prompt);
+            responseText = result.response.text();
+            geminiSuccess = true;
+            console.log(`Successfully used ${modelName} on ${apiKeyObj.name}`);
+            
+            if (i > 0 || modelName !== primaryModels[0]) {
+               switchMessage = `Switched to model ${modelName} via ${apiKeyObj.name} to avoid rate limits.`;
+            }
+            break;
+          } catch (e: any) {
+            console.warn(`Failed to use ${modelName} on ${apiKeyObj.name}:`, e.message || e);
+          }
+        }
+        if (geminiSuccess) break;
+      }
+
+      // Phase 2: If primary models failed on all keys, try secondary models across all keys
+      if (!geminiSuccess) {
+        for (let i = 0; i < apiKeys.length; i++) {
+          const apiKeyObj = apiKeys[i];
+          const genAI = new GoogleGenerativeAI(apiKeyObj.key!);
+          
+          for (const modelName of secondaryModels) {
+            try {
+              const model = genAI.getGenerativeModel({ 
+                model: modelName,
+                generationConfig: { responseMimeType: "application/json" }
+              });
+              
+              const result = await model.generateContent(prompt);
+              responseText = result.response.text();
+              geminiSuccess = true;
+              console.log(`Successfully used fallback ${modelName} on ${apiKeyObj.name}`);
+              switchMessage = `Primary models exhausted. Switched to fallback ${modelName} via ${apiKeyObj.name}.`;
+              break;
+            } catch (e: any) {
+              console.warn(`Failed to use fallback ${modelName} on ${apiKeyObj.name}:`, e.message || e);
+            }
+          }
+          if (geminiSuccess) break;
+        }
+      }
+
+      if (!geminiSuccess) {
+        throw new Error("All Gemini models across all keys failed or rate limited.");
+      }
+
+    } catch (geminiError) {
+      console.warn("Gemini API fallback loop exhausted, falling back to Groq...", geminiError);
+      
+      if (!groqApiKey) {
+        throw new Error("Both Gemini and Groq APIs failed or are missing.");
+      }
+      
+      const groq = new Groq({ apiKey: groqApiKey });
+      let chatCompletion;
+      
+      try {
+        chatCompletion = await groq.chat.completions.create({
+          messages: [{ role: "user", content: prompt }],
+          model: "llama-3.3-70b-versatile",
+          response_format: { type: "json_object" }
+        });
+      } catch (apiError: any) {
+        if (apiError.status === 429 || apiError.message?.includes("Rate limit")) {
+          console.warn("Rate limit reached for llama-3.3-70b-versatile, falling back to llama-3.1-8b-instant");
+          chatCompletion = await groq.chat.completions.create({
+            messages: [{ role: "user", content: prompt }],
+            model: "llama-3.1-8b-instant",
+            response_format: { type: "json_object" }
+          });
+        } else {
+          throw apiError;
+        }
+      }
+      
+      switchMessage = "All Gemini keys exhausted. Switched to Groq (Llama) as ultimate fallback.";
+      responseText = chatCompletion.choices[0]?.message?.content || "";
+    }
+    
     const jsonMatch = responseText.match(/\{[\s\S]*\}/);
     if (!jsonMatch) {
       throw new Error("AI returned invalid format: " + responseText);
     }
 
     const parsedData = JSON.parse(jsonMatch[0]);
+    if (switchMessage) {
+       parsedData.apiSwitchMessage = switchMessage;
+    }
     return NextResponse.json(parsedData);
   } catch (error: any) {
     console.error("Program Simulation Engine Error:", error);
