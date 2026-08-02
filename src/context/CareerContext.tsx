@@ -308,7 +308,12 @@ export function CareerProvider({ children }: { children: ReactNode }) {
       });
 
       if (!response.ok) throw new Error("Failed to simulate career turn");
-      const data: CareerTurnResult = await response.json();
+      const data: CareerTurnResult & { apiSwitchMessage?: string } = await response.json();
+      
+      if (data.apiSwitchMessage) {
+        alert(data.apiSwitchMessage);
+      }
+
       applyTurnResult(data, title, description);
     } catch (error) {
       console.error(error);

@@ -27,7 +27,7 @@ export function DashboardHeader() {
               <span className="text-amber-600">Regering ({state.parliament.filter(p => p.isCoalition).map(p => p.party).join(', ')})</span>
             </div>
             <h1 className="text-2xl lg:text-3xl font-black uppercase tracking-tighter text-[#2B2B2C]">
-              {state.playerParty === "N-VA" ? "Premier Bart De Wever" : `Premier (${state.playerParty})`}
+              {state.playerParty === "N-VA" ? "Premier Bart De Wever" : state.playerParty === "Open Vld" ? "Premier Alexander De Croo" : `Premier (${state.playerParty})`}
             </h1>
           </div>
 

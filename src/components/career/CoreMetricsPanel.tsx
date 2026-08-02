@@ -36,9 +36,10 @@ export function CoreMetricsPanel() {
   const { state } = useCareer();
   const { popularity, coalitionStability, internalStability } = state.metrics;
 
-  const arizonaSeats = state.parliament.filter(p => p.isCoalition).reduce((acc, p) => acc + p.seats, 0);
+  const coalitionSeats = state.parliament.filter(p => p.isCoalition).reduce((acc, p) => acc + p.seats, 0);
   const totalSeats = 150;
   const coalitionPartners = state.parliament.filter(p => p.isCoalition);
+  const coalitionName = state.gameMode === "vivaldi" ? "Vivaldi" : state.gameMode === "arizona" ? "Arizona" : "Coalitie";
 
   return (
     <div className="space-y-6">
@@ -61,7 +62,7 @@ export function CoreMetricsPanel() {
         />
         
         <MetricBar 
-          label="Internal Party Stability (N-VA)" 
+          label={`Internal Party Stability (${state.playerParty})`} 
           value={internalStability} 
           icon={UsersRound} 
         />
@@ -108,8 +109,8 @@ export function CoreMetricsPanel() {
         </h2>
         
         <div className="flex justify-between text-xs font-bold uppercase tracking-wider mb-2">
-          <span className="text-blue-700">Arizona ({arizonaSeats})</span>
-          <span className="text-slate-500">Opposition ({totalSeats - arizonaSeats})</span>
+          <span className="text-blue-700">{coalitionName} ({coalitionSeats})</span>
+          <span className="text-slate-500">Opposition ({totalSeats - coalitionSeats})</span>
         </div>
         
         <div className="relative h-3.5 w-full bg-slate-100 rounded-full overflow-hidden flex mb-6 border border-black/5">

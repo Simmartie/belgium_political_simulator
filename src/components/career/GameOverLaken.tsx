@@ -7,6 +7,8 @@ export function GameOverLaken() {
 
   if (!state.isGameOver) return null;
 
+  const coalitionName = state.gameMode === "vivaldi" ? "Vivaldi" : state.gameMode === "arizona" ? "Arizona" : "coalitie";
+
   return (
     <div className="fixed inset-0 bg-black/95 backdrop-blur-md flex items-center justify-center z-50 p-4">
       <div className="max-w-2xl w-full flex flex-col items-center text-center animate-in fade-in zoom-in duration-500 delay-150">
@@ -19,7 +21,7 @@ export function GameOverLaken() {
         
         <div className="bg-slate-900 border border-slate-800 rounded-2xl p-8 mb-8 text-slate-300 text-lg leading-relaxed shadow-2xl">
           <p className="mb-4">
-            De Koning heeft nota genomen van de onhoudbare situatie binnen de Arizona-coalitie. 
+            De Koning heeft nota genomen van de onhoudbare situatie binnen de {coalitionName}-coalitie. 
             Met een coalitiestabiliteit van minder dan 20%, is er geen werkbare meerderheid meer in het parlement.
           </p>
           <p className="text-red-400 font-bold">

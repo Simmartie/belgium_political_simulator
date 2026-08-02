@@ -14,11 +14,11 @@ import { InstitutionReactionsPanel } from "../../components/career/InstitutionRe
 import { RegionalImpactPanel } from "../../components/career/RegionalImpactPanel";
 import { SaveManager } from "../../components/career/SaveManager";
 import { CoalitionCrisisPanel } from "../../components/career/CoalitionCrisisPanel";
-import { Play, Calendar, AlertCircle } from "lucide-react";
+import { Play, Calendar, AlertCircle, History } from "lucide-react";
 
 export default function CareerPage() {
   const { state, isLoading, activeSaveId } = useCareer();
-  const [view, setView] = useState<"dashboard" | "briefing" | "analysis" | "regional" | "personas" | "institutions">("dashboard");
+  const [view, setView] = useState<"dashboard" | "briefing" | "analysis" | "regional" | "personas" | "institutions" | "history">("dashboard");
 
   if (!activeSaveId) {
     return <SaveManager />;
@@ -29,6 +29,7 @@ export default function CareerPage() {
   const date = new Date(startYear, startMonth - 1 + state.currentMonth - 1);
   const monthName = date.toLocaleString('nl-BE', { month: 'long' });
   const year = date.getFullYear();
+  const coalitionName = state.gameMode === "vivaldi" ? "Vivaldi" : state.gameMode === "arizona" ? "Arizona" : "coalitie";
 
   return (
     <div className="min-h-screen bg-[#f7f3eb] text-slate-900 pb-20 font-sans">
@@ -56,7 +57,7 @@ export default function CareerPage() {
                     Deze Maand — <span className="capitalize">{monthName} {year}</span>
                   </h2>
                   <p className="text-xs font-medium text-slate-600 leading-relaxed mt-2">
-                    Een nieuwe politieke maand staat klaar voor uw beslissingen. Bepaal de beleidsagenda van de Arizona-coalitie of voer strategische maatregelen uit.
+                    Een nieuwe politieke maand staat klaar voor uw beslissingen. Bepaal de beleidsagenda van de {coalitionName}-coalitie of voer strategische maatregelen uit.
                   </p>
 
                   <div className="mt-6 flex flex-col sm:flex-row items-stretch sm:items-center gap-4 border-t border-black/5 pt-5">
@@ -68,9 +69,17 @@ export default function CareerPage() {
                       Speel {monthName} {year} &rarr;
                     </button>
 
-                    <span className="text-[11px] font-bold text-slate-500 flex items-center gap-1.5 justify-center">
+                    <button 
+                      onClick={() => setView("history")}
+                      className="bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 font-black text-xs uppercase tracking-widest py-3.5 px-6 rounded transition-all flex items-center justify-center gap-2 hover:scale-[1.02]"
+                    >
+                      <History className="w-4 h-4" />
+                      Geschiedenis
+                    </button>
+
+                    <span className="text-[11px] font-bold text-slate-500 flex items-center gap-1.5 justify-center sm:ml-auto">
                       <Calendar className="w-3.5 h-3.5" />
-                      Maand {state.currentMonth} van 48
+                      Maand {state.currentMonth} van {state.maxMonths || 48}
                     </span>
                   </div>
                 </div>
@@ -82,9 +91,9 @@ export default function CareerPage() {
               {state.history.length === 0 && (
                 <div className="bg-white/60 rounded-xl border border-black/5 p-6 text-center mt-8">
                   <AlertCircle className="w-8 h-8 text-amber-500 mx-auto mb-2" />
-                  <h4 className="font-bold text-slate-800 text-sm">Start van de Legislaatuur</h4>
-                  <p className="text-xs text-slate-500 mt-1">
-                    Uw regering treedt aan in januari 2025. Klik op 'Speel januari 2025' om uw eerste beleidsagenda op te stellen.
+                  <h4 className="font-bold text-slate-800 text-sm">Start van de Legislatuur</h4>
+                  <p className="text-xs text-slate-500 mt-1 capitalize">
+                    Uw regering treedt aan in {monthName} {year}. Klik op 'Speel {monthName} {year}' om uw eerste beleidsagenda op te stellen.
                   </p>
                 </div>
               )}
@@ -112,6 +121,71 @@ export default function CareerPage() {
 
           {view === "institutions" && state.history.length > 0 && state.history[0].result?.institutions && (
              <InstitutionReactionsPanel institutions={state.history[0].result.institutions} onNext={() => setView("dashboard")} />
+          )}
+
+          {view === "history" && (
+            <div className="bg-white rounded-xl border border-black/10 premium-shadow p-6 lg:p-8">
+              <div className="flex items-center justify-between border-b border-black/10 pb-4 mb-6">
+                 <div>
+                   <span className="text-[10px] font-black uppercase tracking-widest text-slate-500 block mb-1">Overzicht</span>
+                   <h2 className="text-xl font-black uppercase tracking-tighter text-[#2B2B2C]">Beleidsgeschiedenis</h2>
+                 </div>
+                 <button onClick={() => setView("dashboard")} className="text-xs font-bold text-blue-600 hover:underline px-3 py-1.5 rounded hover:bg-blue-50 transition-colors">
+                   &larr; Terug naar Dashboard
+                 </button>
+              </div>
+              
+              <div className="space-y-6">
+                {state.history.length === 0 ? (
+                  <div className="text-center py-12 bg-slate-50 rounded-lg border border-slate-100">
+                    <History className="w-10 h-10 text-slate-300 mx-auto mb-3" />
+                    <p className="text-sm font-medium text-slate-500">Er is nog geen beleid gevoerd in deze legislatuur.</p>
+                  </div>
+                ) : (
+                  state.history.slice().map((turn, i) => {
+                     const turnDate = new Date(startYear, startMonth - 1 + turn.month - 1);
+                     return (
+                      <div key={i} className="border border-black/5 rounded-lg p-5 bg-slate-50/50 hover:bg-white transition-colors">
+                        <div className="flex items-center justify-between mb-3">
+                          <h3 className="font-bold text-slate-800 text-lg">{turn.actionTitle}</h3>
+                          <span className="text-[10px] font-black uppercase tracking-wider text-slate-600 bg-black/5 px-2.5 py-1.5 rounded border border-black/5">
+                            {turnDate.toLocaleString('nl-BE', { month: 'short' })} {turnDate.getFullYear()}
+                          </span>
+                        </div>
+                        <p className="text-sm text-slate-600 mb-5 leading-relaxed">{turn.actionDescription}</p>
+                        
+                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                          <div className="bg-white border border-black/5 rounded p-3 text-center">
+                            <div className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Begroting</div>
+                            <div className={`text-sm font-black ${turn.result.analysis?.budgetImpact?.includes('+') ? 'text-emerald-600' : turn.result.analysis?.budgetImpact?.includes('-') ? 'text-rose-600' : 'text-slate-600'}`}>
+                              {turn.result.analysis?.budgetImpact || "N/A"}
+                            </div>
+                          </div>
+                          <div className="bg-white border border-black/5 rounded p-3 text-center">
+                            <div className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Populariteit</div>
+                            <div className={`text-sm font-black ${turn.result.metrics_impact.popularity > 0 ? 'text-emerald-600' : turn.result.metrics_impact.popularity < 0 ? 'text-rose-600' : 'text-slate-600'}`}>
+                              {turn.result.metrics_impact.popularity > 0 ? "+" : ""}{turn.result.metrics_impact.popularity}%
+                            </div>
+                          </div>
+                          <div className="bg-white border border-black/5 rounded p-3 text-center">
+                            <div className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Stabiliteit</div>
+                            <div className={`text-sm font-black ${turn.result.metrics_impact.coalition > 0 ? 'text-emerald-600' : turn.result.metrics_impact.coalition < 0 ? 'text-rose-600' : 'text-slate-600'}`}>
+                              {turn.result.metrics_impact.coalition > 0 ? "+" : ""}{turn.result.metrics_impact.coalition}%
+                            </div>
+                          </div>
+                          <div className="bg-white border border-black/5 rounded p-3 text-center">
+                            <div className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Complexiteit</div>
+                            <div className="text-sm font-black text-slate-700 truncate px-1" title={turn.result.analysis?.complexity}>
+                              {turn.result.analysis?.complexity || "Low"}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                     );
+                  }).reverse()
+                )}
+              </div>
+            </div>
           )}
 
         </div>
