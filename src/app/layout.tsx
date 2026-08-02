@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Belgian Political Simulator",
-  description: "Test policies and see their impact on Belgium.",
+  title: "Belgische Politieke Simulator",
+  description: "Simuleer beleid en bekijk de politieke en economische impact op België.",
 };
 
 export default function RootLayout({

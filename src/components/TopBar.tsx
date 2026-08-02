@@ -17,7 +17,7 @@ export default function TopBar() {
       <div className="flex items-center gap-4">
         <div className="flex flex-col">
           <h1 className="text-xl font-black tracking-tighter flex items-center gap-2">
-            <span className="text-slate-900">BELGIË</span>
+            <span className="text-slate-900">BELGISCHE</span>
             <span className="text-[#FFD700]">POLITIEKE</span>
             <span className="text-[#ED2939]">SIMULATOR</span>
           </h1>
