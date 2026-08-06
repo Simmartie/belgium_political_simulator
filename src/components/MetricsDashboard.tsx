@@ -10,7 +10,7 @@ export default function MetricsDashboard() {
   const latestPolicy = activePolicies[0];
 
   return (
-    <div className="flex-1 p-6 lg:p-10 space-y-10 overflow-y-scroll bg-transparent">
+    <div className="flex-1 p-4 lg:p-10 space-y-8 lg:space-y-10 lg:overflow-y-scroll bg-transparent">
       {/* Map Section */}
       <section>
         <div className="flex items-center justify-between mb-6">

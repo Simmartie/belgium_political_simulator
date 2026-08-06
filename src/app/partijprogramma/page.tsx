@@ -103,10 +103,10 @@ export default function PartijprogrammaPage() {
       <div className="flex flex-col h-screen bg-[#f7f3eb] text-slate-900 overflow-hidden font-sans">
         <TopBar />
         
-        <div className="flex flex-1 overflow-hidden flex-col md:flex-row">
+        <div className="flex flex-1 overflow-y-auto md:overflow-hidden flex-col md:flex-row">
         
         {/* Sidebar */}
-        <div className="w-full md:w-80 lg:w-[400px] border-r border-black/10 bg-white/50 backdrop-blur flex flex-col h-full z-10 premium-shadow">
+        <div className="w-full md:w-80 lg:w-[400px] md:border-r border-b md:border-b-0 border-black/10 bg-white/50 backdrop-blur flex flex-col md:h-full z-10 premium-shadow shrink-0">
           <div className="p-6 border-b border-black/5 flex-shrink-0">
             <h2 className="text-xl font-black uppercase tracking-tighter text-[#2B2B2C]">Uw Partijprogramma</h2>
             <p className="text-xs font-bold text-slate-500 uppercase tracking-wider mt-1">Dien meerdere beleidspunten in</p>
@@ -173,7 +173,7 @@ export default function PartijprogrammaPage() {
         </div>
 
         {/* Dashboard / Results */}
-        <div className="flex-1 overflow-y-auto p-6 lg:p-10 space-y-10 bg-transparent">
+        <div className="flex-1 md:overflow-y-auto p-4 lg:p-10 space-y-8 lg:space-y-10 bg-transparent">
           {!result ? (
             <div className="h-full flex flex-col items-center justify-center text-center max-w-md mx-auto opacity-50">
               <div className="w-24 h-24 mb-6 rounded-full bg-slate-200 flex items-center justify-center">

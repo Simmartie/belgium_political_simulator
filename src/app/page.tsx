@@ -8,7 +8,7 @@ export default function Home() {
     <SimulatorProvider>
       <div className="flex flex-col h-screen bg-[#f7f3eb] text-slate-900 overflow-hidden font-sans">
         <TopBar />
-        <div className="flex flex-1 overflow-hidden">
+        <div className="flex flex-1 overflow-y-auto lg:overflow-hidden flex-col lg:flex-row">
           <PolicySidebar />
           <MetricsDashboard />
         </div>

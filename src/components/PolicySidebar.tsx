@@ -20,8 +20,8 @@ export default function PolicySidebar() {
   };
 
   return (
-    <aside className="w-full lg:w-96 border-r border-black/10 bg-[#f7f3eb] p-4 flex flex-col h-full overflow-hidden">
-      <div className="flex-1 overflow-y-scroll pr-6 space-y-8 scrollbar-gutter-stable">
+    <aside className="w-full lg:w-96 lg:border-r border-b lg:border-b-0 border-black/10 bg-[#f7f3eb] p-4 flex flex-col lg:h-full lg:overflow-hidden shrink-0">
+      <div className="flex-1 lg:overflow-y-scroll lg:pr-6 space-y-8 scrollbar-gutter-stable">
         
         {/* Custom Policy Creator */}
         <section>
